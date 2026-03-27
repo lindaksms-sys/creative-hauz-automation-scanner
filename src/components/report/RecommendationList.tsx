@@ -32,7 +32,7 @@ const RecommendationList = ({ recommendations }: Props) => (
     {recommendations.map((rec, i) => {
       const IconComp = ICON_MAP[rec.icon] || Zap;
       const diff = DIFFICULTY_STYLES[rec.difficulty || "medium"] || DIFFICULTY_STYLES.medium;
-      const impactScore = Math.min(rec.hoursSaved * 12.5, 100);
+      const impactScore = Math.min(rec.hoursSaved * 20, 100);
 
       return (
         <motion.div
@@ -43,8 +43,8 @@ const RecommendationList = ({ recommendations }: Props) => (
           className="bg-card rounded-xl shadow-card p-6 border border-border hover:shadow-elevated transition-all"
         >
           <div className="flex items-start gap-4">
-            <div className="w-11 h-11 rounded-xl bg-foreground flex items-center justify-center shrink-0">
-              <IconComp className="w-5 h-5 text-background" />
+            <div className="w-11 h-11 rounded-xl bg-primary flex items-center justify-center shrink-0">
+              <IconComp className="w-5 h-5 text-primary-foreground" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2 mb-1">
@@ -65,7 +65,7 @@ const RecommendationList = ({ recommendations }: Props) => (
                 </span>
                 <span className="flex items-center gap-1.5 text-green-accent font-medium">
                   <TrendingUp className="w-3.5 h-3.5" />
-                  +{rec.roiPercent}% ROI
+                  ~{rec.roiPercent}% less manual work
                 </span>
                 {rec.timeToImplement && (
                   <span className="flex items-center gap-1.5 text-muted-foreground">
@@ -79,15 +79,12 @@ const RecommendationList = ({ recommendations }: Props) => (
           {/* Impact bar */}
           <div className="mt-4">
             <div className="flex justify-between text-xs text-muted-foreground mb-1">
-              <span>Impact score</span>
+              <span>Relevance to your needs</span>
               <span>{Math.round(impactScore)}%</span>
             </div>
             <div className="h-2 bg-muted rounded-full overflow-hidden">
               <motion.div
-                className="h-full rounded-full"
-                style={{
-                  background: `linear-gradient(90deg, hsl(18 70% 47%), hsl(25 65% 42%))`,
-                }}
+                className="h-full rounded-full bg-green-accent"
                 initial={{ width: 0 }}
                 animate={{ width: `${impactScore}%` }}
                 transition={{ delay: 0.5 + i * 0.12, duration: 0.6 }}
