@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import ScannerQuestionnaire from "@/components/ScannerQuestionnaire";
 import ScanReportView from "@/components/ScanReport";
@@ -43,6 +44,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <Navbar />
       <div className="flex-1">
         {view === "home" && <HeroSection onStartScan={handleStartScan} />}
         {view === "scan" && (
