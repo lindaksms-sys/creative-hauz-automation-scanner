@@ -15,55 +15,46 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const industryExamples: Record<string, string> = {
-      "Real Estate": `For Real Estate specifically, consider these automation categories:
-- AI Voice Agent for inbound/outbound lead calls (answers property inquiries 24/7, books showings, qualifies buyers by budget/timeline/location)
-- Automated listing syndication & social media posting (auto-generate property descriptions, post to MLS/Zillow/social with AI-written copy and staged photos)
-- Smart CRM drip campaigns (trigger personalized follow-ups based on buyer behavior: open house attendance, listing views, price drop alerts)
-- AI-powered comparative market analysis (auto-pull comps, generate seller presentations, predict days-on-market)
-- Automated transaction coordination (deadline tracking, document collection, closing checklist management)
-- Virtual tour scheduling bot (syncs with calendar, sends reminders, handles rescheduling)`,
-      "Healthcare / Clinic": `For Healthcare/Clinic specifically, consider these automation categories:
-- AI receptionist & appointment scheduling (handles inbound calls, books/reschedules appointments, sends reminders, reduces no-shows by 40%+)
-- Automated patient intake & forms (digital pre-visit questionnaires, insurance verification, consent form collection)
-- AI-powered patient follow-up (post-visit check-ins, medication reminders, satisfaction surveys, review requests)
-- Smart billing & claims automation (auto-code procedures, submit claims, track denials, send patient statements)
-- Clinical documentation assistant (AI-generated visit summaries, SOAP notes from voice recordings, referral letter drafting)
-- Patient communication hub (bulk appointment reminders, waitlist management, seasonal campaign automation)`,
-    };
+    const prompt = `You are a practical, honest AI automation consultant working for Creative Hauz (creativehauz.space), a boutique agency led by Linda Kisimisi that helps small and medium businesses automate repetitive tasks.
 
-    const industryContext = industryExamples[businessType] || `Focus on AI-powered automations specific to ${businessType || industry || "this business type"}: AI voice agents, chatbots, automated email sequences, AI content generation, smart scheduling, automated data entry, and AI-powered CRM updates.`;
-
-    const prompt = `You are an expert AI automation consultant specializing in small and medium businesses. Analyze this business profile and provide hyper-specific, actionable automation recommendations.
+Your job is to analyze this business profile and provide REALISTIC, SPECIFIC automation recommendations that Creative Hauz would actually build and deploy.
 
 Business Type: ${businessType}
 Business Size: ${businessSize}
 Industry: ${industry || businessType}
-Pain Points: ${painPoints?.join(", ") || "General"}
-Custom Pain Point: ${customPainPoint || "None specified"}
+Pain Points: ${painPoints?.join(", ") || "General efficiency"}
+Custom Pain Point Details: ${customPainPoint || "None provided"}
 Daily Time Drain: ${dailyTimeDrain || "Not specified"}
 
-${industryContext}
+CRITICAL RULES:
+1. Base EVERY recommendation strictly on the user's stated pain points and business context. Do NOT suggest things unrelated to what they described.
+2. Keep total hours saved CONSERVATIVE and HONEST — typically 8-14 hours/week total across all recommendations. Never exceed 16 unless the user described extreme manual workload.
+3. Individual recommendation hoursSaved should be 2-5 hrs/week max. These are realistic for simple automations.
+4. ROI percentages should be modest: 10-30% range. Frame as "reduction in manual work" or "improvement in response time," not inflated revenue claims.
+5. Focus on automations Creative Hauz actually delivers: WhatsApp/SMS auto-replies, email sequences, appointment booking bots, invoice reminders, CRM auto-updates, lead follow-up workflows, client onboarding flows, social media scheduling, basic AI chatbots.
+6. Use plain language. No jargon like "multi-modal content engine" or "orchestration layer." Speak like you're advising a busy SMB owner over coffee.
+7. Each recommendation should name a specific tool/approach simply (e.g., "Automated WhatsApp Follow-Up for New Leads" not "AI-Powered Omnichannel Lead Nurturing System").
+8. Difficulty should mostly be "easy" or "medium" — these are meant to be quick wins.
 
 Respond with a JSON object (no markdown) with this exact structure:
 {
-  "totalHoursSaved": <number between 10 and 25>,
-  "summary": "<one sentence summarizing the key finding, mention specific tools or workflows>",
-  "industryInsight": "<one sentence with a specific stat or insight about automation in their industry>",
+  "totalHoursSaved": <number between 8 and 14>,
+  "summary": "<one practical sentence about the biggest opportunity, mentioning their specific pain point>",
+  "industryInsight": "<one sentence with a believable stat about automation in their industry, e.g. 'Businesses that automate client follow-ups typically see 30-40% fewer missed appointments'>",
   "recommendations": [
     {
-      "title": "<specific automation name — include the tool type e.g. 'AI Voice Agent for...' or 'Automated...' >",
-      "description": "<2-3 sentences: what it does, how it integrates with their existing workflow, and a concrete example of the outcome>",
-      "hoursSaved": <number 2-8>,
-      "roiPercent": <number 15-50>,
-      "difficulty": "<one of: easy, medium, advanced>",
-      "timeToImplement": "<e.g. '1-2 weeks', '3-5 days'>",
+      "title": "<specific, simple automation name>",
+      "description": "<2 sentences: what it does in plain language, and one concrete outcome tied to their pain point>",
+      "hoursSaved": <number 2-5>,
+      "roiPercent": <number 10-30>,
+      "difficulty": "<easy or medium>",
+      "timeToImplement": "<e.g. '2-3 days', '1 week'>",
       "icon": "<one of: zap, clock, trending, mail, check, phone, calendar, brain, megaphone>"
     }
   ]
 }
 
-Provide exactly 4 recommendations. Make them HIGHLY specific to the business type — use real tool names, specific workflows, and concrete numbers. Each recommendation should feel like it was written by someone who deeply understands ${businessType || "their"} operations. Order by impact (highest hoursSaved first).`;
+Provide exactly 4 recommendations. Order by relevance to their stated pain points (most relevant first). Make each one feel like a practical suggestion from someone who understands their daily struggles.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -72,9 +63,9 @@ Provide exactly 4 recommendations. Make them HIGHLY specific to the business typ
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: "You are an expert AI automation consultant. Always respond with valid JSON only, no markdown." },
+          { role: "system", content: "You are a practical automation consultant. Always respond with valid JSON only, no markdown. Be honest and conservative with estimates." },
           { role: "user", content: prompt },
         ],
       }),
@@ -103,7 +94,6 @@ Provide exactly 4 recommendations. Make them HIGHLY specific to the business typ
 
     if (!content) throw new Error("No content in AI response");
 
-    // Parse the JSON from the response, handling potential markdown wrapping
     let report;
     try {
       const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
@@ -111,6 +101,16 @@ Provide exactly 4 recommendations. Make them HIGHLY specific to the business typ
     } catch {
       console.error("Failed to parse AI response:", content);
       throw new Error("Failed to parse AI response");
+    }
+
+    // Clamp values to enforce conservative limits
+    if (report.totalHoursSaved > 16) report.totalHoursSaved = Math.min(report.totalHoursSaved, 14);
+    if (report.recommendations) {
+      report.recommendations = report.recommendations.map((rec: any) => ({
+        ...rec,
+        hoursSaved: Math.min(rec.hoursSaved || 3, 5),
+        roiPercent: Math.min(rec.roiPercent || 15, 35),
+      }));
     }
 
     return new Response(JSON.stringify(report), {

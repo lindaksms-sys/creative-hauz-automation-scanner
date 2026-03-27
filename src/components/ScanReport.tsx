@@ -19,6 +19,16 @@ const ScanReportView = ({ report, onRestart }: Props) => (
       <HeroStat totalHoursSaved={report.totalHoursSaved} />
       <RecommendationList recommendations={report.recommendations} />
 
+      {/* Disclaimer */}
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.9 }}
+        className="text-xs text-muted-foreground text-center italic mb-8 max-w-lg mx-auto"
+      >
+        These estimates are based on typical results from similar businesses. Actual savings depend on your current processes and implementation.
+      </motion.p>
+
       {/* CTA Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

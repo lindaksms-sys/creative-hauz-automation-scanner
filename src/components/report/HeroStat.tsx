@@ -1,4 +1,3 @@
-import { TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
@@ -29,16 +28,16 @@ const AnimatedCounter = ({ target }: { target: number }) => {
 
 const HeroStat = ({ totalHoursSaved }: Props) => {
   const monthlyHours = Math.round(totalHoursSaved * 4.3);
-  const yearlySavings = Math.round(monthlyHours * 12 * 35); // $35/hr avg
+  const yearlySavings = Math.round(monthlyHours * 12 * 35);
 
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 0.2 }}
-      className="rounded-2xl shadow-elevated mb-8 overflow-hidden"
+      className="rounded-2xl shadow-elevated mb-8 overflow-hidden border border-border"
     >
-      <div className="bg-foreground p-8 text-center text-background">
+      <div className="bg-primary p-8 text-center text-primary-foreground">
         <div className="font-display text-5xl sm:text-6xl mb-1">
           <AnimatedCounter target={totalHoursSaved} />+
         </div>

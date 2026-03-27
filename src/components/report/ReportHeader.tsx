@@ -23,7 +23,7 @@ const ReportHeader = ({ summary, industryInsight }: Props) => (
       {summary}
     </p>
     {industryInsight && (
-      <p className="text-sm text-primary font-medium max-w-lg mx-auto bg-primary/5 rounded-lg px-4 py-2 mt-4">
+      <p className="text-sm text-green-accent font-medium max-w-lg mx-auto bg-green-accent/5 rounded-lg px-4 py-2 mt-4">
         💡 {industryInsight}
       </p>
     )}
