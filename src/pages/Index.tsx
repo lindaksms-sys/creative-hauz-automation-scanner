@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import ScannerQuestionnaire from "@/components/ScannerQuestionnaire";
 import ScanReportView from "@/components/ScanReport";
