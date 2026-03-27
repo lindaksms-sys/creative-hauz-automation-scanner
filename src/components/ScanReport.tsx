@@ -34,7 +34,7 @@ const ScanReportView = ({ report, onRestart }: Props) => (
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button variant="hero" size="lg" asChild>
-            <a href="https://calendly.com/creativehauz" target="_blank" rel="noopener noreferrer">
+            <a href="https://calendar.app.google/r7Q8bwxVH5JBsmJW9" target="_blank" rel="noopener noreferrer">
               Book a Free Discovery Call
               <ExternalLink className="w-4 h-4" />
             </a>
