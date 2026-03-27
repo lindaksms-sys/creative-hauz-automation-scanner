@@ -6,6 +6,7 @@ import ReportHeader from "./report/ReportHeader";
 import HeroStat from "./report/HeroStat";
 import RecommendationList from "./report/RecommendationList";
 import EmailCapture from "./report/EmailCapture";
+import ShareReport from "./report/ShareReport";
 
 interface Props {
   report: ScanReportType;
@@ -60,7 +61,8 @@ const ScanReportView = ({ report, onRestart }: Props) => (
 
       <EmailCapture report={report} />
 
-      <div className="text-center mt-8">
+      <div className="flex flex-col items-center gap-4 mt-8">
+        <ShareReport report={report} />
         <Button variant="ghost" onClick={onRestart}>
           <RotateCcw className="w-4 h-4" />
           Run another scan
