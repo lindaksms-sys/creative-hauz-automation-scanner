@@ -11,7 +11,7 @@ const Footer = () => (
       <a href="https://creativehauz.space" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors inline-flex items-center gap-1">
         creativehauz.space <ExternalLink className="w-3 h-3" />
       </a>
-      <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
+      <a href="/privacy-policy" className="hover:text-foreground transition-colors">Privacy Policy</a>
       <span>Powered by Lovable</span>
     </div>
   </footer>

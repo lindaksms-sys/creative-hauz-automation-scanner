@@ -143,7 +143,10 @@ const EmailCapture = ({ report }: Props) => {
           </Button>
         </div>
       </form>
-      <p className="text-xs text-muted-foreground mt-3">No spam. Your data is secure and never shared.</p>
+      <p className="text-xs text-muted-foreground mt-3">
+        No spam. Your data is secure and never shared.{" "}
+        <a href="/privacy-policy" className="text-primary hover:underline">Privacy Policy</a>
+      </p>
     </motion.div>
   );
 };
