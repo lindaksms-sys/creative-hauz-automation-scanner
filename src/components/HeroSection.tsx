@@ -21,7 +21,7 @@ const HeroSection = ({ onStartScan }: HeroSectionProps) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-8"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium tracking-widest uppercase mb-8"
           >
             <Zap className="w-4 h-4" />
             Free AI Automation Assessment
@@ -31,13 +31,12 @@ const HeroSection = ({ onStartScan }: HeroSectionProps) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold text-foreground leading-tight mb-6"
+            className="font-display text-4xl sm:text-5xl lg:text-6xl text-foreground leading-tight mb-6"
           >
             Stop losing{" "}
             <span className="text-primary">15+ hours</span> per week.
             <br />
-            <span className="text-green-accent">Discover AI automations</span>{" "}
-            that fit your business.
+            Discover AI automations that fit your business.
           </motion.h1>
 
           <motion.p
