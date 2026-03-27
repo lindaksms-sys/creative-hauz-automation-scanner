@@ -22,14 +22,36 @@ const EmailCapture = ({ report }: Props) => {
     if (!email.trim()) return;
     setSubmitting(true);
     try {
+      const leadId = crypto.randomUUID();
       const { error } = await supabase.from("scanner_leads").insert({
+        id: leadId,
         email: email.trim(),
         name: name.trim() || null,
         report_data: report as any,
       });
       if (error) throw error;
+
+      // Send the report email
+      const topRecs = (report.recommendations || []).slice(0, 5).map((r) => ({
+        title: r.title,
+        hoursSaved: r.hoursSaved,
+        roi: `${r.roiPercent}%`,
+      }));
+      await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "report-summary",
+          recipientEmail: email.trim(),
+          idempotencyKey: `report-summary-${leadId}`,
+          templateData: {
+            name: name.trim() || undefined,
+            totalHoursSaved: report.totalHoursSaved,
+            recommendations: topRecs,
+          },
+        },
+      });
+
       setSubmitted(true);
-      toast.success("Report saved! Your PDF is ready to download.");
+      toast.success("Report saved and emailed! Check your inbox.");
     } catch {
       toast.error("Something went wrong. Please try again.");
     } finally {
