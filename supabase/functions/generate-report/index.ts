@@ -15,7 +15,26 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const prompt = `You are an AI automation consultant for small and medium businesses. Analyze this business profile and provide specific, actionable automation recommendations.
+    const industryExamples: Record<string, string> = {
+      "Real Estate": `For Real Estate specifically, consider these automation categories:
+- AI Voice Agent for inbound/outbound lead calls (answers property inquiries 24/7, books showings, qualifies buyers by budget/timeline/location)
+- Automated listing syndication & social media posting (auto-generate property descriptions, post to MLS/Zillow/social with AI-written copy and staged photos)
+- Smart CRM drip campaigns (trigger personalized follow-ups based on buyer behavior: open house attendance, listing views, price drop alerts)
+- AI-powered comparative market analysis (auto-pull comps, generate seller presentations, predict days-on-market)
+- Automated transaction coordination (deadline tracking, document collection, closing checklist management)
+- Virtual tour scheduling bot (syncs with calendar, sends reminders, handles rescheduling)`,
+      "Healthcare / Clinic": `For Healthcare/Clinic specifically, consider these automation categories:
+- AI receptionist & appointment scheduling (handles inbound calls, books/reschedules appointments, sends reminders, reduces no-shows by 40%+)
+- Automated patient intake & forms (digital pre-visit questionnaires, insurance verification, consent form collection)
+- AI-powered patient follow-up (post-visit check-ins, medication reminders, satisfaction surveys, review requests)
+- Smart billing & claims automation (auto-code procedures, submit claims, track denials, send patient statements)
+- Clinical documentation assistant (AI-generated visit summaries, SOAP notes from voice recordings, referral letter drafting)
+- Patient communication hub (bulk appointment reminders, waitlist management, seasonal campaign automation)`,
+    };
+
+    const industryContext = industryExamples[businessType] || `Focus on AI-powered automations specific to ${businessType || industry || "this business type"}: AI voice agents, chatbots, automated email sequences, AI content generation, smart scheduling, automated data entry, and AI-powered CRM updates.`;
+
+    const prompt = `You are an expert AI automation consultant specializing in small and medium businesses. Analyze this business profile and provide hyper-specific, actionable automation recommendations.
 
 Business Type: ${businessType}
 Business Size: ${businessSize}
@@ -24,22 +43,27 @@ Pain Points: ${painPoints?.join(", ") || "General"}
 Custom Pain Point: ${customPainPoint || "None specified"}
 Daily Time Drain: ${dailyTimeDrain || "Not specified"}
 
+${industryContext}
+
 Respond with a JSON object (no markdown) with this exact structure:
 {
-  "totalHoursSaved": <number between 8 and 25>,
-  "summary": "<one sentence summarizing what you found>",
+  "totalHoursSaved": <number between 10 and 25>,
+  "summary": "<one sentence summarizing the key finding, mention specific tools or workflows>",
+  "industryInsight": "<one sentence with a specific stat or insight about automation in their industry>",
   "recommendations": [
     {
-      "title": "<automation name>",
-      "description": "<2-3 sentence description of what this automation does and why it helps>",
+      "title": "<specific automation name — include the tool type e.g. 'AI Voice Agent for...' or 'Automated...' >",
+      "description": "<2-3 sentences: what it does, how it integrates with their existing workflow, and a concrete example of the outcome>",
       "hoursSaved": <number 2-8>,
       "roiPercent": <number 15-50>,
-      "icon": "<one of: zap, clock, trending, mail, check>"
+      "difficulty": "<one of: easy, medium, advanced>",
+      "timeToImplement": "<e.g. '1-2 weeks', '3-5 days'>",
+      "icon": "<one of: zap, clock, trending, mail, check, phone, calendar, brain, megaphone>"
     }
   ]
 }
 
-Provide 3-5 recommendations. Make them specific to the business type and pain points. Be realistic but optimistic about time savings. Focus on AI-powered automations like AI voice agents, chatbots, automated email sequences, AI content generation, smart scheduling, automated data entry, and AI-powered CRM updates.`;
+Provide exactly 4 recommendations. Make them HIGHLY specific to the business type — use real tool names, specific workflows, and concrete numbers. Each recommendation should feel like it was written by someone who deeply understands ${businessType || "their"} operations. Order by impact (highest hoursSaved first).`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
