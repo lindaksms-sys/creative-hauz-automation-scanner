@@ -34,8 +34,8 @@ const EmailCapture = ({ report }: Props) => {
       // Send the report email
       const topRecs = (report.recommendations || []).slice(0, 5).map((r) => ({
         title: r.title,
-        hoursSaved: r.estimatedHoursSaved,
-        roi: r.roi,
+        hoursSaved: r.hoursSaved,
+        roi: `${r.roiPercent}%`,
       }));
       await supabase.functions.invoke("send-transactional-email", {
         body: {
