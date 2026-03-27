@@ -40,7 +40,7 @@ const RecommendationList = ({ recommendations }: Props) => (
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 + i * 0.12 }}
-          className="bg-card rounded-xl shadow-card p-6 border border-border hover:shadow-elevated transition-shadow"
+          className="bg-card rounded-xl shadow-card p-6 border border-border hover:shadow-elevated transition-all"
         >
           <div className="flex items-start gap-4">
             <div className="w-11 h-11 rounded-xl gradient-primary flex items-center justify-center shrink-0">

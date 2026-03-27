@@ -38,8 +38,8 @@ const HeroStat = ({ totalHoursSaved }: Props) => {
       transition={{ delay: 0.2 }}
       className="rounded-2xl shadow-elevated mb-8 overflow-hidden"
     >
-      <div className="gradient-primary p-8 text-center text-primary-foreground">
-        <div className="font-display text-5xl sm:text-6xl font-extrabold mb-1">
+      <div className="bg-foreground p-8 text-center text-background">
+        <div className="font-display text-5xl sm:text-6xl mb-1">
           <AnimatedCounter target={totalHoursSaved} />+
         </div>
         <div className="text-lg opacity-90">
