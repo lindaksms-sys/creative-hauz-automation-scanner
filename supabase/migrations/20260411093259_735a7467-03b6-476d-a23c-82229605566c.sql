@@ -1,0 +1,1 @@
+ALTER TABLE public.scanner_leads ADD COLUMN niche text;
