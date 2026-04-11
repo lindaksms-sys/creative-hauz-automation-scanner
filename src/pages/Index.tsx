@@ -22,22 +22,46 @@ const Index = () => {
   const handleScanComplete = async (data: ScannerFormData) => {
     setIsLoading(true);
     setScannerData(data);
-    try {
-      const { data: result, error } = await supabase.functions.invoke("generate-report", {
-        body: data,
-      });
 
-      if (error) throw error;
-      if (result?.error) throw new Error(result.error);
+    const maxRetries = 3;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const { data: result, error } = await supabase.functions.invoke("generate-report", {
+          body: data,
+        });
 
-      setReport(result);
-      setView("gate");
-    } catch (err: any) {
-      console.error("Report generation failed:", err);
-      toast.error("Failed to generate report. Please try again.");
-    } finally {
-      setIsLoading(false);
+        if (error) {
+          // Check if it's a rate limit (429) and we can retry
+          if (attempt < maxRetries) {
+            const delay = 2000 * attempt;
+            toast.info(`Generating your report... (attempt ${attempt + 1})`);
+            await new Promise((r) => setTimeout(r, delay));
+            continue;
+          }
+          throw error;
+        }
+        if (result?.error) {
+          if (result.error.includes("Rate limited") && attempt < maxRetries) {
+            const delay = 2000 * attempt;
+            toast.info(`High demand — retrying in a moment...`);
+            await new Promise((r) => setTimeout(r, delay));
+            continue;
+          }
+          throw new Error(result.error);
+        }
+
+        setReport(result);
+        setView("gate");
+        setIsLoading(false);
+        return;
+      } catch (err: any) {
+        if (attempt === maxRetries) {
+          console.error("Report generation failed:", err);
+          toast.error("Failed to generate report. Please try again.");
+        }
+      }
     }
+    setIsLoading(false);
   };
 
   const handleRestart = () => {
