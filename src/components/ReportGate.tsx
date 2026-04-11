@@ -56,6 +56,8 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
           templateData: {
             totalHoursSaved: report.totalHoursSaved,
             recommendations: topRecs,
+            niche,
+            painPoints: scannerData.painPoints || [],
           },
         },
       });
