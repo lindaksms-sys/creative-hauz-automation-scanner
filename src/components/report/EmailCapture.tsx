@@ -4,11 +4,12 @@ import { Mail, CheckCircle2, Download, Send } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import type { ScanReport } from "@/types/scanner";
+import type { ScanReport, ScannerFormData } from "@/types/scanner";
 import { downloadReportPdf } from "@/lib/generateReportPdf";
 
 interface Props {
   report: ScanReport;
+  scannerData?: ScannerFormData | null;
 }
 
 const EmailCapture = ({ report }: Props) => {
