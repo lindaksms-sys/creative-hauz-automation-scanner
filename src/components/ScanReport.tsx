@@ -65,7 +65,7 @@ const ScanReportView = ({ report, scannerData, onRestart }: Props) => (
         </div>
       </motion.div>
 
-      <EmailCapture report={report} />
+      <EmailCapture report={report} scannerData={scannerData} />
 
       {/* Bottom: Compact AI Growth System CTA */}
       <div className="mt-8">

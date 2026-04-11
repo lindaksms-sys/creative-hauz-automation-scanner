@@ -61,7 +61,7 @@ const EmailCapture = ({ report, scannerData }: Props) => {
   };
 
   const handleDownloadPdf = () => {
-    downloadReportPdf(report);
+    downloadReportPdf(report, scannerData);
     toast.success("PDF downloaded!");
   };
 
