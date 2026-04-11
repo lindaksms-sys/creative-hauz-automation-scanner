@@ -1,32 +1,49 @@
 
 
-## Plan: Enhance Immediate Report Email + Follow-Up Sequence Guidance
+## Plan: Set Up n8n Webhook for Follow-Up Email Sequence
 
-### Important Note on Follow-Up Emails
+### How It Works
 
-The **immediate report email** (sent right after form submission) is a legitimate transactional email -- the user just completed the scanner and expects the report. This is already working and can be enhanced.
+When a lead submits their email on the gate screen, your app will fire a webhook to n8n with the lead's data. In n8n, you'll build a workflow with delay nodes to send the 1-hour and Day 2 follow-up emails.
 
-However, the **1-hour follow-up** and **Day 2 follow-up** emails are a **drip/nurture sequence** -- automated emails sent on a schedule to convert leads. These are classified as marketing emails, not transactional. Lovable's built-in email system is designed exclusively for transactional emails (one-to-one, triggered by a specific user action). Sending marketing sequences through it would damage your domain's sender reputation and could affect deliverability of critical emails like your report delivery.
+### What I'll Do (in your codebase)
 
-**For the follow-up sequence, you'll need a dedicated marketing email service** like Mailchimp, ConvertKit, or ActiveCampaign. These services are purpose-built for drip campaigns with proper unsubscribe handling, engagement tracking, and compliance.
+**1. Create an Edge Function: `trigger-lead-webhook`**
+- Accepts lead data (email, niche, pain points, report summary) from the client
+- Forwards it as a POST request to your n8n webhook URL
+- Keeps the n8n webhook URL as a server-side secret (not exposed in frontend code)
 
-### What This Plan Covers
+**2. Update `ReportGate.tsx`**
+- After the lead is saved and the report email is sent, call the new edge function to trigger the n8n workflow
 
-**1. Enhance the immediate report email template** (transactional -- fully supported)
-- Update `report-summary.tsx` to include the full proposal teaser, AI Growth System pricing, and a branded CTA to book the audit
-- Add the lead's niche and specific pain points to personalize the email
-- Pass scanner form data (niche, pain points) through `templateData`
-- Update `ReportGate.tsx` to include `scannerData` fields in the email payload
+**3. Add a secret for the n8n webhook URL**
+- You'll paste your n8n webhook URL as a secret so the edge function can use it
 
-**2. Update the ReportGate component**
-- Pass niche, scanner answers, and personalized details into the `templateData` so the email is richer and more compelling
+### What You'll Do (in n8n)
+
+Build a workflow like this:
+
+```text
+[Webhook Trigger]
+       │
+       ├──► [Send Email: Case study link]  (1-hour Wait node before)
+       │
+       └──► [Send Email: "Ready to book?"] (2-day Wait node before)
+```
+
+Steps in n8n:
+1. Create a new workflow
+2. Add a **Webhook** node as the trigger (POST method) — copy the webhook URL
+3. Add a **Wait** node set to 1 hour
+4. Add an **Email Send** node (using Gmail, SMTP, or Resend node) with your case study content, branded as Linda / Creative Hauz
+5. Add another **Wait** node set to 2 days
+6. Add another **Email Send** node with the "Ready to book your audit?" content
+7. Activate the workflow
 
 ### Files to Change
-- `supabase/functions/_shared/transactional-email-templates/report-summary.tsx` -- enhanced template with proposal teaser, niche-specific content, case study mention, and audit CTA
-- `supabase/functions/_shared/transactional-email-templates/registry.ts` -- no changes needed (template name stays the same)
-- `src/components/ReportGate.tsx` -- pass additional `templateData` fields (niche, scanner answers)
-- Redeploy `send-transactional-email` edge function after template changes
+- `supabase/functions/trigger-lead-webhook/index.ts` — new Edge Function
+- `src/components/ReportGate.tsx` — add webhook trigger call after lead capture
 
-### Recommendation for Follow-Up Sequence
-After approval, I can help you set up a webhook or integration point so that when a lead is captured, their data is sent to your marketing email tool (e.g., via a Zapier/Make webhook or direct API) to trigger the drip sequence there. That keeps your transactional emails clean and your follow-ups properly managed.
+### Secret Needed
+- `N8N_WEBHOOK_URL` — your n8n workflow's webhook trigger URL
 
