@@ -12,7 +12,7 @@ interface Props {
   scannerData?: ScannerFormData | null;
 }
 
-const EmailCapture = ({ report }: Props) => {
+const EmailCapture = ({ report, scannerData }: Props) => {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [submitted, setSubmitted] = useState(false);
