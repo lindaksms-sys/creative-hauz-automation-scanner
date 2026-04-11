@@ -86,7 +86,7 @@ const Index = () => {
           />
         )}
         {view === "report" && report && (
-          <ScanReportView report={report} onRestart={handleRestart} />
+          <ScanReportView report={report} scannerData={scannerData} onRestart={handleRestart} />
         )}
       </div>
       <Footer />

@@ -1,23 +1,29 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ExternalLink, RotateCcw } from "lucide-react";
 import { motion } from "framer-motion";
-import type { ScanReport as ScanReportType } from "@/types/scanner";
+import type { ScanReport as ScanReportType, ScannerFormData } from "@/types/scanner";
 import ReportHeader from "./report/ReportHeader";
 import HeroStat from "./report/HeroStat";
+import AIGrowthSystemCTA from "./report/AIGrowthSystemCTA";
 import RecommendationList from "./report/RecommendationList";
 import EmailCapture from "./report/EmailCapture";
 import ShareReport from "./report/ShareReport";
 
 interface Props {
   report: ScanReportType;
+  scannerData?: ScannerFormData | null;
   onRestart: () => void;
 }
 
-const ScanReportView = ({ report, onRestart }: Props) => (
+const ScanReportView = ({ report, scannerData, onRestart }: Props) => (
   <section className="min-h-screen bg-background py-12 px-4">
     <div className="max-w-3xl mx-auto">
       <ReportHeader summary={report.summary} industryInsight={report.industryInsight} />
       <HeroStat totalHoursSaved={report.totalHoursSaved} />
+
+      {/* Top: Full AI Growth System CTA */}
+      <AIGrowthSystemCTA scannerData={scannerData} variant="full" delay={0.3} />
+
       <RecommendationList recommendations={report.recommendations} />
 
       {/* Disclaimer */}
@@ -60,6 +66,11 @@ const ScanReportView = ({ report, onRestart }: Props) => (
       </motion.div>
 
       <EmailCapture report={report} />
+
+      {/* Bottom: Compact AI Growth System CTA */}
+      <div className="mt-8">
+        <AIGrowthSystemCTA scannerData={scannerData} variant="compact" delay={1} />
+      </div>
 
       <div className="flex flex-col items-center gap-4 mt-8">
         <ShareReport report={report} />
