@@ -62,6 +62,17 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
         },
       });
 
+      // Trigger n8n webhook for follow-up email sequence (fire-and-forget)
+      supabase.functions.invoke("trigger-lead-webhook", {
+        body: {
+          email: email.trim(),
+          niche,
+          painPoints: scannerData.painPoints || [],
+          totalHoursSaved: report.totalHoursSaved,
+          recommendations: topRecs,
+        },
+      }).catch((err) => console.warn("Webhook trigger failed (non-blocking):", err));
+
       setSubmitted(true);
       toast.success("Report sent to your inbox!");
     } catch {
