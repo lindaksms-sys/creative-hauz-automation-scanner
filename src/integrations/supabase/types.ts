@@ -107,6 +107,7 @@ export type Database = {
           email: string
           id: string
           name: string | null
+          niche: string | null
           report_data: Json | null
         }
         Insert: {
@@ -114,6 +115,7 @@ export type Database = {
           email: string
           id?: string
           name?: string | null
+          niche?: string | null
           report_data?: Json | null
         }
         Update: {
@@ -121,6 +123,7 @@ export type Database = {
           email?: string
           id?: string
           name?: string | null
+          niche?: string | null
           report_data?: Json | null
         }
         Relationships: []
