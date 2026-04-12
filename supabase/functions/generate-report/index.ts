@@ -10,7 +10,22 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { businessType, businessSize, painPoints, customPainPoint, dailyTimeDrain, industry } = await req.json();
+    const body = await req.json();
+    const businessType = typeof body.businessType === "string" ? body.businessType.slice(0, 200) : "";
+    const businessSize = typeof body.businessSize === "string" ? body.businessSize.slice(0, 100) : "";
+    const painPoints = Array.isArray(body.painPoints)
+      ? body.painPoints.filter((p: unknown) => typeof p === "string").slice(0, 20).map((p: string) => p.slice(0, 500))
+      : [];
+    const customPainPoint = typeof body.customPainPoint === "string" ? body.customPainPoint.slice(0, 1000) : "";
+    const dailyTimeDrain = typeof body.dailyTimeDrain === "string" ? body.dailyTimeDrain.slice(0, 200) : "";
+    const industry = typeof body.industry === "string" ? body.industry.slice(0, 200) : "";
+
+    if (!businessType) {
+      return new Response(JSON.stringify({ error: "businessType is required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
