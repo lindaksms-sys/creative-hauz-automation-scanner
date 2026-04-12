@@ -71,14 +71,14 @@ Respond with a JSON object (no markdown) with this exact structure:
 
 Provide exactly 4 recommendations. Order by relevance to their stated pain points (most relevant first). Make each one feel like a practical suggestion from someone who understands their daily struggles.`;
 
-    const response = await fetch("https://api.x.ai/v1/chat/completions", {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${GROK_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "grok-3-mini",
+        model: "llama-3.3-70b-versatile",
         messages: [
           {
             role: "user",
