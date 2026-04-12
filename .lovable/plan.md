@@ -1,49 +1,23 @@
 
 
-## Plan: Set Up n8n Webhook for Follow-Up Email Sequence
+## Plan: Add N8N_WEBHOOK_URL Secret
 
-### How It Works
+### What I'll Do
 
-When a lead submits their email on the gate screen, your app will fire a webhook to n8n with the lead's data. In n8n, you'll build a workflow with delay nodes to send the 1-hour and Day 2 follow-up emails.
+Use the `add_secret` tool to prompt you to paste your n8n webhook URL. This will securely store it as `N8N_WEBHOOK_URL` so the `trigger-lead-webhook` Edge Function can use it.
 
-### What I'll Do (in your codebase)
+### What You Need Ready
 
-**1. Create an Edge Function: `trigger-lead-webhook`**
-- Accepts lead data (email, niche, pain points, report summary) from the client
-- Forwards it as a POST request to your n8n webhook URL
-- Keeps the n8n webhook URL as a server-side secret (not exposed in frontend code)
+Your n8n **Production** webhook URL — it looks something like:
+`https://your-n8n-instance.com/webhook/abc123-xxxx-xxxx`
 
-**2. Update `ReportGate.tsx`**
-- After the lead is saved and the report email is sent, call the new edge function to trigger the n8n workflow
+Make sure your n8n workflow is **activated** so the production URL is live.
 
-**3. Add a secret for the n8n webhook URL**
-- You'll paste your n8n webhook URL as a secret so the edge function can use it
+### After This
 
-### What You'll Do (in n8n)
-
-Build a workflow like this:
-
-```text
-[Webhook Trigger]
-       │
-       ├──► [Send Email: Case study link]  (1-hour Wait node before)
-       │
-       └──► [Send Email: "Ready to book?"] (2-day Wait node before)
-```
-
-Steps in n8n:
-1. Create a new workflow
-2. Add a **Webhook** node as the trigger (POST method) — copy the webhook URL
-3. Add a **Wait** node set to 1 hour
-4. Add an **Email Send** node (using Gmail, SMTP, or Resend node) with your case study content, branded as Linda / Creative Hauz
-5. Add another **Wait** node set to 2 days
-6. Add another **Email Send** node with the "Ready to book your audit?" content
-7. Activate the workflow
-
-### Files to Change
-- `supabase/functions/trigger-lead-webhook/index.ts` — new Edge Function
-- `src/components/ReportGate.tsx` — add webhook trigger call after lead capture
-
-### Secret Needed
-- `N8N_WEBHOOK_URL` — your n8n workflow's webhook trigger URL
+Once the secret is saved, the full flow will work end-to-end:
+1. Lead submits email on the gate screen
+2. Immediate report email is sent
+3. `trigger-lead-webhook` fires the n8n webhook with lead data
+4. n8n handles the 1-hour and Day 2 follow-up emails
 
