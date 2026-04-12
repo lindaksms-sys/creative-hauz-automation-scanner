@@ -91,15 +91,15 @@ Provide exactly 4 recommendations. Order by relevance to their stated pain point
     );
 
     if (!response.ok) {
+      const t = await response.text();
+      console.error("Gemini API error:", response.status, t);
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limited. Please try again in a moment." }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const t = await response.text();
-      console.error("Gemini API error:", response.status, t);
-      throw new Error("Gemini API error");
+      throw new Error(`Gemini API error: ${response.status}`);
     }
 
     const data = await response.json();
