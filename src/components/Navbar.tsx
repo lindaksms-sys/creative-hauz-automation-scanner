@@ -41,7 +41,7 @@ const Navbar = () => {
           ))}
           <Button variant="hero" size="sm" asChild>
             <a
-              href="https://calendar.app.google/r7Q8bwxVH5JBsmJW9"
+              href="https://calendar.app.google/SfprwqMYFqERrAwi7"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -84,7 +84,7 @@ const Navbar = () => {
               ))}
               <Button variant="hero" size="sm" className="w-full" asChild>
                 <a
-                  href="https://calendar.app.google/r7Q8bwxVH5JBsmJW9"
+                  href="https://calendar.app.google/SfprwqMYFqERrAwi7"
                   target="_blank"
                   rel="noopener noreferrer"
                 >

@@ -107,7 +107,7 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
             </div>
             <Button variant="hero" size="lg" className="w-full text-base py-6" asChild>
               <a
-                href="https://calendar.app.google/r7Q8bwxVH5JBsmJW9"
+                href="https://calendar.app.google/SfprwqMYFqERrAwi7"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -205,7 +205,7 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
               variant="hero"
               size="lg"
               disabled={submitting || !email.trim() || !niche}
-              className="w-full text-base py-6"
+              className="w-full text-sm sm:text-base py-6 whitespace-normal text-center leading-snug"
             >
               {submitting ? (
                 <>

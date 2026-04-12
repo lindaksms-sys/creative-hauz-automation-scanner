@@ -83,7 +83,7 @@ const AIGrowthSystemCTA = ({ scannerData, variant = "full", delay = 0 }: Props) 
           className="w-full text-base font-bold py-6"
           asChild
         >
-          <a href="https://calendar.app.google/r7Q8bwxVH5JBsmJW9" target="_blank" rel="noopener noreferrer">
+          <a href="https://calendar.app.google/SfprwqMYFqERrAwi7" target="_blank" rel="noopener noreferrer">
             Book My Free AI Audit
             <ArrowRight className="w-4 h-4" />
           </a>
@@ -144,7 +144,7 @@ const AIGrowthSystemCTA = ({ scannerData, variant = "full", delay = 0 }: Props) 
         </p>
 
         <Button variant="hero" size="lg" className="w-full text-base font-bold py-6" asChild>
-          <a href="https://calendar.app.google/r7Q8bwxVH5JBsmJW9" target="_blank" rel="noopener noreferrer">
+          <a href="https://calendar.app.google/SfprwqMYFqERrAwi7" target="_blank" rel="noopener noreferrer">
             Book My Free AI Audit
             <ArrowRight className="w-4 h-4" />
           </a>
