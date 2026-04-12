@@ -27,8 +27,8 @@ serve(async (req) => {
       });
     }
 
-    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
+    const GROK_API_KEY = Deno.env.get("GROK_API_KEY");
+    if (!GROK_API_KEY) throw new Error("GROK_API_KEY is not configured");
 
     const prompt = `You are a practical, honest AI automation consultant working for Creative Hauz (creativehauz.space), a boutique agency led by Linda Kisimisi that helps small and medium businesses automate repetitive tasks.
 
@@ -71,48 +71,47 @@ Respond with a JSON object (no markdown) with this exact structure:
 
 Provide exactly 4 recommendations. Order by relevance to their stated pain points (most relevant first). Make each one feel like a practical suggestion from someone who understands their daily struggles.`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: "You are a practical automation consultant. Always respond with valid JSON only, no markdown. Be honest and conservative with estimates.\n\n" + prompt }],
-            },
-          ],
-          generationConfig: {
-            responseMimeType: "application/json",
+    const response = await fetch("https://api.x.ai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${GROK_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "grok-3-mini",
+        messages: [
+          {
+            role: "user",
+            content: "You are a practical automation consultant. Always respond with valid JSON only, no markdown. Be honest and conservative with estimates.\n\n" + prompt,
           },
-        }),
-      }
-    );
+        ],
+        response_format: { type: "json_object" },
+      }),
+    });
 
     if (!response.ok) {
       const t = await response.text();
-      console.error("Gemini API error:", response.status, t);
+      console.error("Grok API error:", response.status, t);
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limited. Please try again in a moment." }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      throw new Error(`Gemini API error: ${response.status}`);
+      throw new Error(`Grok API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const content = data.choices?.[0]?.message?.content;
 
-    if (!content) throw new Error("No content in Gemini response");
+    if (!content) throw new Error("No content in Grok response");
 
     let report;
     try {
       const cleaned = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
       report = JSON.parse(cleaned);
     } catch {
-      console.error("Failed to parse Gemini response:", content);
+      console.error("Failed to parse Grok response:", content);
       throw new Error("Failed to parse AI response");
     }
 
