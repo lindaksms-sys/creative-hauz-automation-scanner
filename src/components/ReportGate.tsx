@@ -205,7 +205,7 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
               variant="hero"
               size="lg"
               disabled={submitting || !email.trim() || !niche}
-              className="w-full text-base py-6"
+              className="w-full text-sm sm:text-base py-6 whitespace-normal text-center leading-snug"
             >
               {submitting ? (
                 <>
