@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { ScanReport, ScannerFormData } from "@/types/scanner";
+import { buildReportHtml } from "@/lib/buildReportHtml";
 
 const NICHES = [
   "Real Estate",
@@ -34,6 +35,7 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
     setSubmitting(true);
     try {
       const leadId = crypto.randomUUID();
+      // Save lead to database
       const { error } = await supabase.from("scanner_leads").insert({
         id: leadId,
         email: email.trim(),
@@ -42,36 +44,26 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
       });
       if (error) throw error;
 
-      // Send the report email
-      const topRecs = (report.recommendations || []).slice(0, 5).map((r) => ({
-        title: r.title,
-        hoursSaved: r.hoursSaved,
-        roi: `${r.roiPercent}%`,
-      }));
-      await supabase.functions.invoke("send-transactional-email", {
-        body: {
-          templateName: "report-summary",
-          recipientEmail: email.trim(),
-          idempotencyKey: `report-summary-${leadId}`,
-          templateData: {
-            totalHoursSaved: report.totalHoursSaved,
-            recommendations: topRecs,
-            niche,
-            painPoints: scannerData.painPoints || [],
-          },
-        },
+      // Build full report HTML
+      const reportHtml = buildReportHtml({
+        totalHoursSaved: report.totalHoursSaved,
+        recommendations: report.recommendations,
+        summary: report.summary,
+        industryInsight: report.industryInsight,
+        niche,
+        painPoints: scannerData.painPoints || [],
       });
 
-      // Trigger n8n webhook for follow-up email sequence (fire-and-forget)
-      supabase.functions.invoke("trigger-lead-webhook", {
+      // Send everything to n8n webhook
+      const { error: webhookError } = await supabase.functions.invoke("trigger-lead-webhook", {
         body: {
           email: email.trim(),
           niche,
-          painPoints: scannerData.painPoints || [],
-          totalHoursSaved: report.totalHoursSaved,
-          recommendations: topRecs,
+          scanner_answers: scannerData,
+          report_content: reportHtml,
         },
-      }).catch((err) => console.warn("Webhook trigger failed (non-blocking):", err));
+      });
+      if (webhookError) throw webhookError;
 
       setSubmitted(true);
       toast.success("Report sent to your inbox!");
