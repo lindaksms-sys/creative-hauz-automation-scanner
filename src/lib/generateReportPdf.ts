@@ -316,7 +316,7 @@ export const generateReportPdf = (report: ScanReport, scannerData?: ScannerFormD
 
   doc.setFontSize(7);
   doc.setFont("helvetica", "normal");
-  doc.text("calendar.app.google/r7Q8bwxVH5JBsmJW9", pageWidth / 2, y + 36, { align: "center" });
+  doc.text("calendar.app.google/SfprwqMYFqERrAwi7", pageWidth / 2, y + 36, { align: "center" });
 
   // ── Footer ──
   const footerY = pageHeight - 12;

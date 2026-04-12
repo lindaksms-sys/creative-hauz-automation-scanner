@@ -107,7 +107,7 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
             </div>
             <Button variant="hero" size="lg" className="w-full text-base py-6" asChild>
               <a
-                href="https://calendar.app.google/r7Q8bwxVH5JBsmJW9"
+                href="https://calendar.app.google/SfprwqMYFqERrAwi7"
                 target="_blank"
                 rel="noopener noreferrer"
               >

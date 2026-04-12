@@ -122,7 +122,7 @@ const ReportSummaryEmail = ({ name, totalHoursSaved, niche, painPoints, recommen
             <Text style={ctaText}>
               Ready to implement these automations and start saving time?
             </Text>
-            <Button style={ctaButton} href="https://calendar.app.google/r7Q8bwxVH5JBsmJW9">
+            <Button style={ctaButton} href="https://calendar.app.google/SfprwqMYFqERrAwi7">
               Book My Free AI Audit →
             </Button>
             <Text style={urgencyText}>
