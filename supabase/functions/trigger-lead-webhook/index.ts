@@ -20,13 +20,12 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const email = typeof body.email === "string" ? body.email.trim() : "";
     const niche = typeof body.niche === "string" ? body.niche.slice(0, 200) : "";
-    const painPoints = Array.isArray(body.painPoints)
-      ? body.painPoints.filter((p: unknown) => typeof p === "string").slice(0, 20).map((p: string) => p.slice(0, 500))
-      : [];
-    const totalHoursSaved = typeof body.totalHoursSaved === "number" ? body.totalHoursSaved : 0;
-    const recommendations = Array.isArray(body.recommendations)
-      ? body.recommendations.slice(0, 10)
-      : [];
+    const scanner_answers = body.scanner_answers && typeof body.scanner_answers === "object"
+      ? body.scanner_answers
+      : {};
+    const report_content = typeof body.report_content === "string"
+      ? body.report_content
+      : "";
 
     if (!email || !EMAIL_RE.test(email)) {
       return new Response(JSON.stringify({ error: "A valid email is required" }), {
@@ -41,9 +40,8 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         email,
         niche,
-        painPoints,
-        totalHoursSaved,
-        recommendations,
+        scanner_answers,
+        report_content,
         triggeredAt: new Date().toISOString(),
       }),
     });
