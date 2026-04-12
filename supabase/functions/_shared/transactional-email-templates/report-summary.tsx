@@ -144,8 +144,7 @@ const ReportSummaryEmail = ({ name, totalHoursSaved, niche, painPoints, recommen
 
 export const template = {
   component: ReportSummaryEmail,
-  subject: (data: Record<string, any>) =>
-    `Your AI Automation Report — ${data.totalHoursSaved ?? 0}+ Hours/Month Savings`,
+  subject: 'Your Creative Hauz AI Automation Report + Custom Proposal',
   displayName: 'Automation Report Summary',
   previewData: {
     name: 'Jane',
