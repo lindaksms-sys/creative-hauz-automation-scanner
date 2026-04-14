@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ExternalLink, RotateCcw } from "lucide-react";
+import { BOOKING_URL } from "@/constants/scanner";
 import { motion } from "framer-motion";
 import type { ScanReport as ScanReportType, ScannerFormData } from "@/types/scanner";
 import ReportHeader from "./report/ReportHeader";
@@ -51,9 +52,13 @@ const ScanReportView = ({ report, scannerData, onRestart }: Props) => (
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button variant="hero" size="lg" asChild>
-            <a href="https://calendar.app.google/SfprwqMYFqERrAwi7" target="_blank" rel="noopener noreferrer">
-              Book a Free Discovery Call
-              <ExternalLink className="w-4 h-4" />
+            <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer">
+              Book My Free AI Audit →
+            </a>
+          </Button>
+          <Button variant="outline-primary" size="lg" asChild>
+            <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer">
+              I just booked my audit → skip all follow-ups
             </a>
           </Button>
           <Button variant="outline-primary" size="lg" asChild>

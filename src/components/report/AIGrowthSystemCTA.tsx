@@ -1,4 +1,5 @@
-import { ArrowRight, Star } from "lucide-react";
+import { Star } from "lucide-react";
+import { BOOKING_URL } from "@/constants/scanner";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import type { ScannerFormData } from "@/types/scanner";
@@ -83,9 +84,18 @@ const AIGrowthSystemCTA = ({ scannerData, variant = "full", delay = 0 }: Props) 
           className="w-full text-base font-bold py-6"
           asChild
         >
-          <a href="https://calendar.app.google/SfprwqMYFqERrAwi7" target="_blank" rel="noopener noreferrer">
-            Book My Free AI Audit
-            <ArrowRight className="w-4 h-4" />
+          <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer">
+            Book My Free AI Audit →
+          </a>
+        </Button>
+        <Button
+          variant="outline"
+          size="lg"
+          className="w-full text-base py-6 mt-2"
+          asChild
+        >
+          <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer">
+            I just booked my audit → skip all follow-ups
           </a>
         </Button>
       </motion.div>
@@ -144,9 +154,14 @@ const AIGrowthSystemCTA = ({ scannerData, variant = "full", delay = 0 }: Props) 
         </p>
 
         <Button variant="hero" size="lg" className="w-full text-base font-bold py-6" asChild>
-          <a href="https://calendar.app.google/SfprwqMYFqERrAwi7" target="_blank" rel="noopener noreferrer">
-            Book My Free AI Audit
-            <ArrowRight className="w-4 h-4" />
+          <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer">
+            Book My Free AI Audit →
+          </a>
+        </Button>
+
+        <Button variant="outline-primary" size="lg" className="w-full text-base py-6" asChild>
+          <a href={BOOKING_URL} target="_blank" rel="noopener noreferrer">
+            I just booked my audit → skip all follow-ups
           </a>
         </Button>
 
