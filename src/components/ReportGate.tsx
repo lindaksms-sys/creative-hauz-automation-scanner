@@ -90,12 +90,25 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
             </div>
             <Button variant="hero" size="lg" className="w-full text-base py-6" asChild>
               <a
-                href="https://calendar.app.google/SfprwqMYFqERrAwi7"
+                href={BOOKING_URL}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Book My Free AI Audit
-                <ArrowRight className="w-4 h-4" />
+                Book My Free AI Audit →
+              </a>
+            </Button>
+            <Button
+              variant="outline-primary"
+              size="lg"
+              className="w-full text-base py-6"
+              asChild
+            >
+              <a
+                href={BOOKING_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                I just booked my audit → skip all follow-ups
               </a>
             </Button>
             <p className="text-sm text-orange-500 font-semibold">
@@ -137,11 +150,11 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
           <h1 className="font-display text-3xl sm:text-4xl font-bold text-foreground mb-3">
             Your AI Automation Report is Ready
           </h1>
-          <p className="text-muted-foreground text-lg">
-            These recommendations could save you{" "}
-            <span className="font-bold text-foreground">8–15+ hours/week</span>{" "}
-            and <span className="font-bold text-foreground">3x your appointments</span>.
-          </p>
+           <p className="text-muted-foreground text-lg">
+             These recommendations could save you{" "}
+             <span className="font-bold text-foreground">{report.totalHoursSaved}+ hours/week</span>{" "}
+             and <span className="font-bold text-foreground">3x your appointments</span>.
+           </p>
         </div>
 
         <div className="bg-card rounded-2xl shadow-elevated p-6 sm:p-8 border border-border">
@@ -177,7 +190,7 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
                 className="w-full h-12 px-4 rounded-lg border border-input bg-background text-foreground focus:ring-2 focus:ring-ring outline-none"
               >
                 <option value="">Select your niche...</option>
-                {NICHES.map((n) => (
+                {BUSINESS_TYPES.map((n) => (
                   <option key={n} value={n}>{n}</option>
                 ))}
               </select>
