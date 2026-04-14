@@ -16,14 +16,25 @@ const PAIN_POINT_LABELS: Record<string, string> = {
 };
 
 const NICHE_RESULTS: Record<string, string> = {
-  "Real Estate": "80% faster lead response, 3x property viewings booked, 15+ hrs saved/week",
-  "Healthcare / Clinic": "90% fewer no-shows, 3x appointment fill rate, 12+ hrs saved/week",
-  "Recruitment Agency": "80% faster CV screening, 3x candidate placements, 15+ hrs saved/week",
-  "Professional Services": "70% faster client onboarding, 2x billable hours recovered, 12+ hrs saved/week",
-  "Marketing / Agency": "3x content output, 80% faster reporting, 15+ hrs saved/week",
-  "Retail / E-Commerce": "60% fewer cart abandonments, 3x repeat purchases, 12+ hrs saved/week",
-  "Construction / Trades": "90% fewer missed quotes, 2x job bookings, 10+ hrs saved/week",
-  "Food & Hospitality": "80% faster reservations, 3x online orders, 12+ hrs saved/week",
+  "Real Estate": "80% faster lead response, 3x property viewings booked",
+  "Healthcare / Clinic": "90% fewer no-shows, 3x appointment fill rate",
+  "Recruitment Agency": "80% faster CV screening, 3x candidate placements",
+  "Professional Services": "70% faster client onboarding, 2x billable hours recovered",
+  "Marketing / Agency": "3x content output, 80% faster reporting",
+  "Retail / E-Commerce": "60% fewer cart abandonments, 3x repeat purchases",
+  "Construction / Trades": "90% fewer missed quotes, 2x job bookings",
+  "Food & Hospitality": "80% faster reservations, 3x online orders",
+};
+
+const NICHE_AUDIENCE_LABELS: Record<string, string> = {
+  "Real Estate": "real estate professionals",
+  "Healthcare / Clinic": "healthcare providers and clinics",
+  "Recruitment Agency": "recruitment agencies",
+  "Professional Services": "professional services firms",
+  "Marketing / Agency": "content creators and social media managers",
+  "Retail / E-Commerce": "retail and e-commerce businesses",
+  "Construction / Trades": "construction and trades businesses",
+  "Food & Hospitality": "food and hospitality businesses",
 };
 
 const TESTIMONIALS = [
@@ -41,11 +52,12 @@ const TESTIMONIALS = [
 
 interface Props {
   scannerData?: ScannerFormData | null;
+  totalHoursSaved?: number;
   variant?: "full" | "compact";
   delay?: number;
 }
 
-const AIGrowthSystemCTA = ({ scannerData, variant = "full", delay = 0 }: Props) => {
+const AIGrowthSystemCTA = ({ scannerData, totalHoursSaved, variant = "full", delay = 0 }: Props) => {
   const painDrains = scannerData?.painPoints
     ?.map((p) => PAIN_POINT_LABELS[p])
     .filter(Boolean)
@@ -59,7 +71,10 @@ const AIGrowthSystemCTA = ({ scannerData, variant = "full", delay = 0 }: Props) 
       : "repetitive manual tasks eating your day";
 
   const niche = scannerData?.businessType || "";
-  const nicheResults = NICHE_RESULTS[niche] || "80% faster operations, 3x appointments booked, 15+ hrs saved/week";
+  const nicheResultBase = NICHE_RESULTS[niche] || "80% faster operations, 3x appointments booked";
+  const hoursSavedLabel = totalHoursSaved ? `${totalHoursSaved}+` : "15+";
+  const nicheResults = `${nicheResultBase}, ${hoursSavedLabel} hrs saved/week`;
+  const nicheAudience = NICHE_AUDIENCE_LABELS[niche] || "businesses like yours";
 
   if (variant === "compact") {
     return (
@@ -119,9 +134,13 @@ const AIGrowthSystemCTA = ({ scannerData, variant = "full", delay = 0 }: Props) 
 
       <div className="p-6 sm:p-8 space-y-5">
         <p className="text-foreground leading-relaxed">
-          Based on your biggest time drains — <span className="font-semibold text-primary">{drainText}</span> — the perfect fit is our{" "}
+          Based on your biggest time drains — <span className="font-semibold text-primary">{drainText}</span> — the perfect fit for{" "}
+          <span className="font-semibold">{nicheAudience}</span> is our{" "}
           <span className="font-bold">AI Growth System</span>{" "}
           <span className="text-muted-foreground">($9,997 one-time + $997/mo retainer)</span>.
+        </p>
+        <p className="text-foreground text-sm leading-relaxed">
+          This system includes the exact automations shown below, built specifically for businesses like yours.
         </p>
 
         <div className="space-y-2">

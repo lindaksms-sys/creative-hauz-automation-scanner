@@ -23,7 +23,7 @@ const ScanReportView = ({ report, scannerData, onRestart }: Props) => (
       <HeroStat totalHoursSaved={report.totalHoursSaved} />
 
       {/* Top: Full AI Growth System CTA */}
-      <AIGrowthSystemCTA scannerData={scannerData} variant="full" delay={0.3} />
+      <AIGrowthSystemCTA scannerData={scannerData} totalHoursSaved={report.totalHoursSaved} variant="full" delay={0.3} />
 
       <RecommendationList recommendations={report.recommendations} />
 
@@ -74,7 +74,7 @@ const ScanReportView = ({ report, scannerData, onRestart }: Props) => (
 
       {/* Bottom: Compact AI Growth System CTA */}
       <div className="mt-8">
-        <AIGrowthSystemCTA scannerData={scannerData} variant="compact" delay={1} />
+        <AIGrowthSystemCTA scannerData={scannerData} totalHoursSaved={report.totalHoursSaved} variant="compact" delay={1} />
       </div>
 
       <div className="flex flex-col items-center gap-4 mt-8">
