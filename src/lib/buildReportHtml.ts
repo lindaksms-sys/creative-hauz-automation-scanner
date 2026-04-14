@@ -46,9 +46,22 @@ export function buildReportHtml(params: BuildReportParams): string {
     )
     .join("");
 
+  const nicheAudienceLabels: Record<string, string> = {
+    "Real Estate": "real estate professionals",
+    "Healthcare / Clinic": "healthcare providers and clinics",
+    "Recruitment Agency": "recruitment agencies",
+    "Professional Services": "professional services firms",
+    "Marketing / Agency": "content creators and social media managers",
+    "Retail / E-Commerce": "retail and e-commerce businesses",
+    "Construction / Trades": "construction and trades businesses",
+    "Food & Hospitality": "food and hospitality businesses",
+  };
+  const nicheAudience = nicheAudienceLabels[niche] || "businesses like yours";
+
   const painSection =
     painLabels.length > 0
-      ? `<p style="font-size:15px;color:#555;line-height:1.6;">Based on your biggest time drains — <strong>${painLabels.slice(0, 3).join(", ")}</strong> — the perfect fit is our <strong>AI Growth System</strong>.</p>`
+      ? `<p style="font-size:15px;color:#555;line-height:1.6;">Based on your biggest time drains — <strong>${painLabels.slice(0, 3).join(", ")}</strong> — the perfect fit for <strong>${nicheAudience}</strong> is our <strong>AI Growth System</strong>.</p>
+         <p style="font-size:14px;color:#555;line-height:1.6;">This system includes the exact automations shown below, built specifically for businesses like yours.</p>`
       : "";
 
   return `<!DOCTYPE html>
@@ -86,7 +99,7 @@ export function buildReportHtml(params: BuildReportParams): string {
     <p style="font-size:14px;color:#555;line-height:1.4;margin:0 0 4px;padding-left:8px;">• Automated client intake &amp; onboarding</p>
     <p style="font-size:14px;color:#555;line-height:1.4;margin:0 0 4px;padding-left:8px;">• Full workflow automation + custom dashboard</p>
     <p style="font-size:14px;color:#555;line-height:1.4;margin:0 0 4px;padding-left:8px;">• 4-week build + 2 months of optimization calls</p>
-    <p style="font-size:15px;color:#1a1a1a;line-height:1.6;margin:14px 0 16px;">Clients in your exact niche see: <strong>${nicheResult}</strong>, ${totalHoursSaved}+ hrs saved/week.</p>
+     <p style="font-size:15px;color:#1a1a1a;line-height:1.6;margin:14px 0 16px;">Clients in your exact niche see: <strong>${nicheResult}</strong>, ${totalHoursSaved}+ hrs saved/week.</p>
     <div style="background:#fff;border-radius:8px;padding:16px;border-left:4px solid #c4572a;margin:16px 0 0;">
       <p style="font-size:14px;color:#333;font-style:italic;line-height:1.5;margin:0 0 8px;">"Within 3 weeks our AI handled 80% of CV screening. We booked 3x more placements without hiring."</p>
       <p style="font-size:13px;color:#777;margin:0;font-weight:600;">— Priya N., Recruitment Agency, Lagos</p>
