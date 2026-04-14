@@ -97,7 +97,7 @@ export function buildReportHtml(params: BuildReportParams): string {
 
   <div style="text-align:center;">
     <p style="font-size:15px;color:#555;margin:0 0 16px;">Ready to implement these automations and start saving time?</p>
-    <a href="https://calendar.app.google/SfprwqMYFqERrAwi7" style="background:#c4572a;color:#fff;padding:14px 28px;border-radius:8px;font-size:15px;font-weight:600;text-decoration:none;display:inline-block;">Book My Free AI Audit →</a>
+    <a href="https://calendar.app.google/3RL1z4zboDkeWLebA" style="background:#c4572a;color:#fff;padding:14px 28px;border-radius:8px;font-size:15px;font-weight:600;text-decoration:none;display:inline-block;">Book My Free AI Audit →</a>
     <p style="font-size:13px;color:#e67e22;font-weight:600;margin:12px 0 0;">⚡ Limited audit slots this week — 4 already booked today</p>
   </div>
 
