@@ -6,16 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { ScanReport, ScannerFormData } from "@/types/scanner";
 import { buildReportHtml } from "@/lib/buildReportHtml";
-
-const NICHES = [
-  "Real Estate",
-  "Recruitment Agency",
-  "Law Firm",
-  "Accounting Firm",
-  "Clinic / Med Spa",
-  "Coach / Consultant",
-  "Other",
-];
+import { BUSINESS_TYPES, BOOKING_URL } from "@/constants/scanner";
 
 interface Props {
   report: ScanReport;

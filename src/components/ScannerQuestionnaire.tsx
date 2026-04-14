@@ -4,16 +4,7 @@ import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { ScannerFormData } from "@/types/scanner";
 
-const BUSINESS_TYPES = [
-  "Real Estate",
-  "Healthcare / Clinic",
-  "Retail / E-Commerce",
-  "Professional Services",
-  "Marketing / Agency",
-  "Construction / Trades",
-  "Food & Hospitality",
-  "Other",
-];
+import { BUSINESS_TYPES } from "@/constants/scanner";
 
 const BUSINESS_SIZES = [
   "Solo / Freelancer",
