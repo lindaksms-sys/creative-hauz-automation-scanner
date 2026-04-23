@@ -103,28 +103,52 @@ export type Database = {
       }
       scanner_leads: {
         Row: {
+          booked: boolean
+          booking_date: string | null
+          case_study_sent_at: string | null
           created_at: string
           email: string
+          follow_up_stage: string
           id: string
+          last_contacted_at: string | null
           name: string | null
           niche: string | null
+          reminder_sent_at: string | null
           report_data: Json | null
+          scanner_answers: Json | null
+          source: string
         }
         Insert: {
+          booked?: boolean
+          booking_date?: string | null
+          case_study_sent_at?: string | null
           created_at?: string
           email: string
+          follow_up_stage?: string
           id?: string
+          last_contacted_at?: string | null
           name?: string | null
           niche?: string | null
+          reminder_sent_at?: string | null
           report_data?: Json | null
+          scanner_answers?: Json | null
+          source?: string
         }
         Update: {
+          booked?: boolean
+          booking_date?: string | null
+          case_study_sent_at?: string | null
           created_at?: string
           email?: string
+          follow_up_stage?: string
           id?: string
+          last_contacted_at?: string | null
           name?: string | null
           niche?: string | null
+          reminder_sent_at?: string | null
           report_data?: Json | null
+          scanner_answers?: Json | null
+          source?: string
         }
         Relationships: []
       }

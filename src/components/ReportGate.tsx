@@ -26,14 +26,6 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
     setSubmitting(true);
     try {
       const leadId = crypto.randomUUID();
-      // Save lead to database
-      const { error } = await supabase.from("scanner_leads").insert({
-        id: leadId,
-        email: email.trim(),
-        niche,
-        report_data: report as any,
-      });
-      if (error) throw error;
 
       // Build full report HTML
       const reportHtml = buildReportHtml({
@@ -44,6 +36,21 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
         niche,
         painPoints: scannerData.painPoints || [],
       });
+
+      // Save lead to database with full follow-up workflow schema
+      const nowIso = new Date().toISOString();
+      const { error } = await supabase.from("scanner_leads").insert({
+        id: leadId,
+        email: email.trim(),
+        niche,
+        report_data: reportHtml as any,
+        scanner_answers: scannerData as any,
+        booked: false,
+        follow_up_stage: "report_sent",
+        last_contacted_at: nowIso,
+        source: "scanner",
+      });
+      if (error) throw error;
 
       // Send everything to n8n webhook
       const { error: webhookError } = await supabase.functions.invoke("trigger-lead-webhook", {
