@@ -39,9 +39,10 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
 
       // Save lead to database with full follow-up workflow schema
       const nowIso = new Date().toISOString();
-      const { error } = await supabase.from("scanner_leads").insert({
+      const leadRow = {
         id: leadId,
         email: email.trim(),
+        name: null as string | null,
         niche,
         report_data: reportHtml as any,
         scanner_answers: scannerData as any,
@@ -49,19 +50,23 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
         follow_up_stage: "report_sent",
         last_contacted_at: nowIso,
         source: "scanner",
-      });
+        created_at: nowIso,
+      };
+      const { error } = await supabase.from("scanner_leads").insert(leadRow);
       if (error) throw error;
 
-      // Send everything to n8n webhook
-      const { error: webhookError } = await supabase.functions.invoke("trigger-lead-webhook", {
-        body: {
-          email: email.trim(),
-          niche,
-          scanner_answers: scannerData,
-          report_content: reportHtml,
-        },
-      });
-      if (webhookError) throw webhookError;
+      // Fire webhook with the EXACT same payload shape as scanner_leads.
+      // Non-blocking: failures are logged server-side for retry but won't disrupt UX.
+      try {
+        const { error: webhookError } = await supabase.functions.invoke("trigger-lead-webhook", {
+          body: leadRow,
+        });
+        if (webhookError) {
+          console.warn("[lead-webhook] non-blocking failure:", webhookError);
+        }
+      } catch (webhookErr) {
+        console.warn("[lead-webhook] non-blocking exception:", webhookErr);
+      }
 
       setSubmitted(true);
       toast.success("Report sent to your inbox!");
