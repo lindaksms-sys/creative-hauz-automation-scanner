@@ -32,16 +32,7 @@ export const generateReportPdf = (report: ScanReport, scannerData?: ScannerFormD
     }
   };
 
-  // Derive pain drain text
-  const painDrains = scannerData?.painPoints
-    ?.map((p) => PAIN_POINT_LABELS[p])
-    .filter(Boolean)
-    .slice(0, 2) || [];
-  const drainText = painDrains.length > 0
-    ? painDrains.join(" and ")
-    : scannerData?.dailyTimeDrain?.trim()?.slice(0, 80) || "repetitive manual tasks";
-  const niche = scannerData?.businessType || "";
-  const nicheResults = NICHE_RESULTS[niche] || "80% faster operations, 3x appointments booked, 15+ hrs saved/week";
+  void scannerData;
 
   // ── Page background ──
   doc.setFillColor(...colors.lightBg);
