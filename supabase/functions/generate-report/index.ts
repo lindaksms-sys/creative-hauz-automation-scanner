@@ -43,7 +43,11 @@ Daily Time Drain: ${dailyTimeDrain || "Not specified"}
 
 CRITICAL RULES:
 1. Base EVERY recommendation strictly on the user's stated pain points and business context. Do NOT suggest things unrelated to what they described.
-2. Keep total hours saved CONSERVATIVE and HONEST — typically 8-14 hours/week total across all recommendations. Never exceed 16 unless the user described extreme manual workload.
+2. Calculate totalHoursSaved tied to the user's actual workload — DO NOT default to a "safe" middle number. Use these tiers:
+   - Base by number of pain points: 1 → 4-7, 2 → 7-10, 3 → 10-13, 4+ → 12-16 hrs/week
+   - Adjust by business size: solo/1-person → bottom of the range, 2-10 → middle, 11+ → top
+   - Adjust by dailyTimeDrain: mentions "all day"/"most of my day"/≥4 hrs/day → push to top; short or vague → bottom
+   - The individual recommendation hoursSaved values MUST sum to roughly totalHoursSaved
 3. Individual recommendation hoursSaved should be 2-5 hrs/week max. These are realistic for simple automations.
 4. ROI percentages should be modest: 10-30% range. Frame as "reduction in manual work" or "improvement in response time," not inflated revenue claims.
 5. Focus on automations Creative Hauz actually delivers: WhatsApp/SMS auto-replies, email sequences, appointment booking bots, invoice reminders, CRM auto-updates, lead follow-up workflows, client onboarding flows, social media scheduling, basic AI chatbots.
@@ -53,7 +57,7 @@ CRITICAL RULES:
 
 Respond with a JSON object (no markdown) with this exact structure:
 {
-  "totalHoursSaved": <number between 8 and 14>,
+  "totalHoursSaved": <number 4-16, calculated per the tier rules above>,
   "summary": "<one practical sentence about the biggest opportunity, mentioning their specific pain point>",
   "industryInsight": "<one sentence with a believable stat about automation in their industry, e.g. 'Businesses that automate client follow-ups typically see 30-40% fewer missed appointments'>",
   "recommendations": [
@@ -115,15 +119,27 @@ Provide exactly 4 recommendations. Order by relevance to their stated pain point
       throw new Error("Failed to parse AI response");
     }
 
-    // Clamp values to enforce conservative limits
-    if (report.totalHoursSaved > 16) report.totalHoursSaved = Math.min(report.totalHoursSaved, 14);
+    // Clamp per-recommendation values
     if (report.recommendations) {
       report.recommendations = report.recommendations.map((rec: any) => ({
         ...rec,
-        hoursSaved: Math.min(rec.hoursSaved || 3, 5),
+        hoursSaved: Math.max(1, Math.min(rec.hoursSaved || 3, 5)),
         roiPercent: Math.min(rec.roiPercent || 15, 35),
       }));
     }
+
+    // Recompute totalHoursSaved from the actual recommendations so it varies per submission
+    const recs = Array.isArray(report.recommendations) ? report.recommendations : [];
+    const recSum = recs.reduce((s: number, r: any) => s + (Number(r.hoursSaved) || 0), 0);
+    let total = recSum > 0 ? recSum : Number(report.totalHoursSaved) || 8;
+
+    // Deterministic ±1 jitter seeded by the user's inputs (same inputs → same number)
+    const seedStr = `${businessType}|${businessSize}|${industry}|${painPoints.join(",")}|${customPainPoint}|${dailyTimeDrain}`;
+    let seed = 0;
+    for (let i = 0; i < seedStr.length; i++) seed = ((seed << 5) - seed + seedStr.charCodeAt(i)) | 0;
+    const jitter = (Math.abs(seed) % 3) - 1; // -1, 0, +1
+    total = Math.max(4, Math.min(16, total + jitter));
+    report.totalHoursSaved = total;
 
     return new Response(JSON.stringify(report), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -1,57 +1,72 @@
-## Goal
+## Problem
 
-Remove the generic "AI Growth System" recommendation block (the $9,997 one-time + $997/mo offer) everywhere it currently appears in the scanner output. Keep the personalized automation recommendations, the hours-saved hero stat, the booking CTA, and the email-summary delivery flow intact.
+Every report shows roughly the same `totalHoursSaved` value (often 12+). The Llama model — instructed to stay between 8 and 14 — converges on a "safe" middle number, so reports feel cookie-cutter.
 
-## Audit — where the offer currently lives
+## Root cause
 
-1. **Web report (`src/components/ScanReport.tsx`)** — renders `<AIGrowthSystemCTA variant="full">` near the top and `<AIGrowthSystemCTA variant="compact">` near the bottom.
-2. **Component (`src/components/report/AIGrowthSystemCTA.tsx`)** — full file is the offer (badge "Recommended AI System for You", $9,997 line, "What's included" list, niche-results box, two testimonials, audit CTA).
-3. **PDF (`src/lib/generateReportPdf.ts`)**
-   - Lines ~153–222: top "Recommended AI System for You" card with $9,997 pricing, includes list, niche-results box, testimonial.
-   - Lines ~298–319: bottom "Your Recommended System: AI Growth System" orange CTA banner.
-4. **Email HTML (`src/lib/buildReportHtml.ts`)** lines ~91–107: "🚀 Recommended AI System for You" block with $9,997 line, includes list, niche-results, testimonial.
-5. **Transactional email template (`supabase/functions/_shared/transactional-email-templates/report-summary.tsx`)** lines ~85–~110 (similar block).
-6. **Memory** — `mem://business/ai-growth-system-offer` exists for this offer; should be marked retired so future sessions don't re-introduce it.
+In `supabase/functions/generate-report/index.ts`:
+- The prompt tells the model `"totalHoursSaved": <number between 8 and 14>` with no guidance on how to vary it.
+- The server-side clamp only caps the upper bound; it never recomputes or varies the value.
+- The per-recommendation `hoursSaved` (2–5) sums to ~12 by default, reinforcing the same number.
 
-## What changes
+## Fix
 
-### Web report
-- Delete both `<AIGrowthSystemCTA>` usages from `ScanReport.tsx` (and the import).
-- Delete `src/components/report/AIGrowthSystemCTA.tsx` entirely.
-- Keep the existing "Ready to implement these automations?" CTA card (Book My Free AI Audit + Full Blueprint links) — it stays as the single conversion CTA.
+Make `totalHoursSaved` a deterministic function of the user's actual inputs, not a free-form number from the LLM.
 
-### PDF (`generateReportPdf.ts`)
-- Remove the top AI Growth System card (the section labeled `── AI GROWTH SYSTEM SECTION (TOP — Full) ──`, ~lines 153–222, including its `ensureSpace`, header bar, body, includes list, niche box, testimonial, and the trailing `y += 74`).
-- Remove the bottom AI Growth System CTA banner (~lines 298–319).
-- Add a small replacement footer CTA (single line + booking URL) so the PDF still ends with a clear next step:
-  > "Want help implementing these? Book a free 30-min AI Audit — calendar.app.google/3RL1z4zboDkeWLebA"
-- Drop now-unused locals (`drainText`, `nicheResults`, related niche maps) only if nothing else references them after the cuts.
+### 1. Tier the range by inputs (prompt change)
 
-### Email summary
-- In `buildReportHtml.ts`: remove the "🚀 Recommended AI System for You" block (the entire `<div style="background:#fdf3ef …">` containing pain section, $9,997 line, includes list, niche-result line, and Priya testimonial). Keep the recommendations list, the hours-saved hero, and the existing "Book My Free AI Audit →" CTA further down.
-- In `report-summary.tsx` template: delete the equivalent block (lines ~85–110) so the queued/transactional email matches.
+Replace the flat "8–14" instruction with explicit tiers based on signals the user provided:
 
-### Memory hygiene
-- Update `mem://business/ai-growth-system-offer` to mark the offer as retired ("Do not re-introduce the $9,997 AI Growth System recommendation in scanner output.") and update the index entry so future sessions know not to re-add it.
+```text
+Calculate totalHoursSaved tied to the user's actual workload:
+- Base by number of pain points selected:
+  • 1 pain point  → 4-7  hrs/week
+  • 2 pain points → 7-10 hrs/week
+  • 3 pain points → 10-13 hrs/week
+  • 4+ pain points→ 12-16 hrs/week
+- Adjust by business size:
+  • Solo / 1-person  → bottom of the range
+  • 2-10 employees   → middle
+  • 11+ employees    → top of the range
+- Adjust by dailyTimeDrain text:
+  • Mentions "all day", "most of my day", numbers ≥4 hrs/day → push to top
+  • Short or vague drain → bottom
+Recommendations' individual hoursSaved must SUM to roughly totalHoursSaved.
+```
 
-## Out of scope
+### 2. Server-side: recompute total from the recommendations
 
-- No copy changes to the personalized recommendations themselves.
-- No changes to questionnaire, lead capture, n8n webhook, Supabase tables, RLS, or auth.
-- No new offer or replacement product copy — user only asked to remove the generic recommendation. If you later want a different offer block, that's a follow-up.
+After the model returns, override `totalHoursSaved` with the sum of `recommendations[].hoursSaved`, then clamp to a sensible window (4–16). This guarantees the number reflects the actual recommended mix and varies as the LLM varies the per-rec hours.
+
+```ts
+const recSum = recs.reduce((s, r) => s + (r.hoursSaved || 0), 0);
+report.totalHoursSaved = Math.max(4, Math.min(16, recSum || report.totalHoursSaved));
+```
+
+### 3. Deterministic jitter to break ties
+
+If two users produce identical rec sums, add ±1 hr jitter seeded by a hash of `businessType + businessSize + painPoints + dailyTimeDrain`. Same inputs → same number (stable), different inputs → different number.
+
+```ts
+const seed = hash(`${businessType}|${businessSize}|${painPoints.join(',')}|${dailyTimeDrain}`);
+const jitter = (seed % 3) - 1; // -1, 0, or +1
+report.totalHoursSaved = Math.max(4, Math.min(16, report.totalHoursSaved + jitter));
+```
 
 ## Files touched
 
-- `src/components/ScanReport.tsx` (edit)
-- `src/components/report/AIGrowthSystemCTA.tsx` (delete)
-- `src/lib/generateReportPdf.ts` (edit)
-- `src/lib/buildReportHtml.ts` (edit)
-- `supabase/functions/_shared/transactional-email-templates/report-summary.tsx` (edit)
-- `mem://business/ai-growth-system-offer` + `mem://index.md` (update)
+- `supabase/functions/generate-report/index.ts` — prompt update + post-processing (sum + clamp + jitter).
+
+Nothing else changes — the field flows unchanged into the web report, PDF, and email.
+
+## Out of scope
+
+- No UI changes.
+- No DB changes.
+- Per-recommendation hours stay capped at 5 (already in place).
+- Won't switch model providers.
 
 ## Verification
 
-- Run the scanner end-to-end in preview, confirm no "AI Growth System" / "$9,997" copy in the rendered report.
-- Download PDF, confirm the two removed sections are gone and layout still flows.
-- Trigger an email summary (or use the `preview-transactional-email` function) and confirm the offer block is gone.
-- `rg -n "AI Growth System|9,?997"` returns zero hits in `src/` and `supabase/functions/`.
+- Run the scanner with 3 different profiles (e.g., 1 pain point + solo, 2 pain points + 2-10, 4 pain points + 11+) and confirm three distinct `totalHoursSaved` values.
+- Run the same profile twice → same value (stable, deterministic).
