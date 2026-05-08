@@ -57,7 +57,7 @@ CRITICAL RULES:
 
 Respond with a JSON object (no markdown) with this exact structure:
 {
-  "totalHoursSaved": <number between 8 and 14>,
+  "totalHoursSaved": <number 4-16, calculated per the tier rules above>,
   "summary": "<one practical sentence about the biggest opportunity, mentioning their specific pain point>",
   "industryInsight": "<one sentence with a believable stat about automation in their industry, e.g. 'Businesses that automate client follow-ups typically see 30-40% fewer missed appointments'>",
   "recommendations": [
