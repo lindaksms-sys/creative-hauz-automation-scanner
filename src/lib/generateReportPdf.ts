@@ -2,27 +2,6 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import type { ScanReport, AutomationRecommendation, ScannerFormData } from "@/types/scanner";
 
-const PAIN_POINT_LABELS: Record<string, string> = {
-  "lead-followup": "leads slipping through the cracks",
-  "customer-onboarding": "manual client onboarding",
-  "content-social": "content creation & social media",
-  "appointment-booking": "missed appointments and no-shows",
-  "invoice-chasing": "chasing invoices and late payments",
-  "data-entry": "repetitive data entry and CRM updates",
-  "email-management": "drowning in emails",
-  "reporting": "spending hours on reports",
-};
-
-const NICHE_RESULTS: Record<string, string> = {
-  "Real Estate": "80% faster lead response, 3x viewings booked, 15+ hrs saved/week",
-  "Healthcare / Clinic": "90% fewer no-shows, 3x appointment fill rate, 12+ hrs saved/week",
-  "Recruitment Agency": "80% faster CV screening, 3x placements, 15+ hrs saved/week",
-  "Professional Services": "70% faster onboarding, 2x billable hours recovered",
-  "Marketing / Agency": "3x content output, 80% faster reporting, 15+ hrs saved/week",
-  "Retail / E-Commerce": "60% fewer abandonments, 3x repeat purchases",
-  "Construction / Trades": "90% fewer missed quotes, 2x job bookings",
-  "Food & Hospitality": "80% faster reservations, 3x online orders",
-};
 
 export const generateReportPdf = (report: ScanReport, scannerData?: ScannerFormData | null): jsPDF => {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
