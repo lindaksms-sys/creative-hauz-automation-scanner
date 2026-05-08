@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['DM Serif Display', 'Georgia', 'serif'],
+        sans: ['DM Sans', 'system-ui', 'sans-serif'],
+        display: ['Cormorant Garamond', 'Georgia', 'serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -51,14 +51,17 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        teal: {
-          DEFAULT: "hsl(var(--teal))",
-          foreground: "hsl(var(--teal-foreground))",
-        },
         "green-accent": {
           DEFAULT: "hsl(var(--green-accent))",
           foreground: "hsl(var(--green-accent-foreground))",
         },
+        rust: {
+          DEFAULT: "hsl(var(--rust))",
+          foreground: "hsl(var(--rust-foreground))",
+        },
+        brass: "hsl(var(--brass))",
+        bone: "hsl(var(--bone))",
+        charcoal: "hsl(var(--charcoal))",
         navy: "hsl(var(--navy))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
