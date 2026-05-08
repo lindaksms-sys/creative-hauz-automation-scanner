@@ -68,11 +68,6 @@ const ScanReportView = ({ report, scannerData, onRestart }: Props) => (
 
       <EmailCapture report={report} scannerData={scannerData} />
 
-      {/* Bottom: Compact AI Growth System CTA */}
-      <div className="mt-8">
-        <AIGrowthSystemCTA scannerData={scannerData} totalHoursSaved={report.totalHoursSaved} variant="compact" delay={1} />
-      </div>
-
       <div className="flex flex-col items-center gap-4 mt-8">
         <ShareReport report={report} />
         <Button variant="ghost" onClick={onRestart}>
