@@ -14,8 +14,13 @@ interface Props {
   onContinueToReport: () => void;
 }
 
+const PHONE_RE = /^[0-9+\-()\s]*$/;
+
 const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [company, setCompany] = useState("");
   const [niche, setNiche] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -23,6 +28,13 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !niche) return;
+    const cleanPhone = phone.trim().slice(0, 30);
+    const cleanCompany = company.trim().slice(0, 120);
+    const cleanName = name.trim().slice(0, 120);
+    if (cleanPhone && !PHONE_RE.test(cleanPhone)) {
+      toast.error("Please enter a valid phone number.");
+      return;
+    }
     setSubmitting(true);
     try {
       const leadId = crypto.randomUUID();
@@ -39,13 +51,19 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
 
       // Save lead to database with full follow-up workflow schema
       const nowIso = new Date().toISOString();
+      const enrichedAnswers = {
+        ...(scannerData as any),
+        phone: cleanPhone || null,
+        company: cleanCompany || null,
+        full_name: cleanName || null,
+      };
       const leadRow = {
         id: leadId,
         email: email.trim(),
-        name: null as string | null,
+        name: cleanName || null,
         niche,
         report_data: reportHtml as any,
-        scanner_answers: scannerData as any,
+        scanner_answers: enrichedAnswers as any,
         booked: false,
         follow_up_stage: "report_sent",
         last_contacted_at: nowIso,
@@ -55,14 +73,22 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
       const { error } = await supabase.from("scanner_leads").insert(leadRow);
       if (error) throw error;
 
-      // Fire webhook with the EXACT same payload shape as scanner_leads.
+      // Fire webhook with the EXACT same payload shape as scanner_leads + a CRM block.
       // Non-blocking: failures are logged server-side for retry but won't disrupt UX.
+      let crmSent = false;
       try {
-        const { error: webhookError } = await supabase.functions.invoke("trigger-lead-webhook", {
-          body: leadRow,
+        const { data: webhookData, error: webhookError } = await supabase.functions.invoke("trigger-lead-webhook", {
+          body: {
+            ...leadRow,
+            phone: cleanPhone,
+            company: cleanCompany,
+            full_name: cleanName,
+          },
         });
         if (webhookError) {
           console.warn("[lead-webhook] non-blocking failure:", webhookError);
+        } else if (webhookData?.crm_sent) {
+          crmSent = true;
         }
       } catch (webhookErr) {
         console.warn("[lead-webhook] non-blocking exception:", webhookErr);
@@ -70,6 +96,11 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
 
       setSubmitted(true);
       toast.success("Report sent to your inbox!");
+      if (crmSent) {
+        toast.success("Sent to your CRM ✓", {
+          description: "We've added your details to follow up.",
+        });
+      }
     } catch {
       toast.error("Something went wrong. Please try again.");
     } finally {
@@ -179,6 +210,20 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1.5">
+                Full name
+              </label>
+              <input
+                type="text"
+                placeholder="Your name"
+                value={name}
+                maxLength={120}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full h-12 px-4 rounded-lg border border-input bg-background text-foreground focus:ring-2 focus:ring-ring outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">
                 Email address <span className="text-destructive">*</span>
               </label>
               <input
@@ -189,6 +234,35 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full h-12 px-4 rounded-lg border border-input bg-background text-foreground focus:ring-2 focus:ring-ring outline-none"
               />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">
+                  Phone
+                </label>
+                <input
+                  type="tel"
+                  placeholder="+1 555 123 4567"
+                  value={phone}
+                  maxLength={30}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full h-12 px-4 rounded-lg border border-input bg-background text-foreground focus:ring-2 focus:ring-ring outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">
+                  Company
+                </label>
+                <input
+                  type="text"
+                  placeholder="Company name"
+                  value={company}
+                  maxLength={120}
+                  onChange={(e) => setCompany(e.target.value)}
+                  className="w-full h-12 px-4 rounded-lg border border-input bg-background text-foreground focus:ring-2 focus:ring-ring outline-none"
+                />
+              </div>
             </div>
 
             <div>

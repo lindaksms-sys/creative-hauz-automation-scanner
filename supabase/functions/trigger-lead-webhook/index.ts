@@ -31,11 +31,17 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Payload aligned 1:1 with the scanner_leads schema.
+    const sanitize = (v: unknown, max: number) =>
+      typeof v === "string" ? v.trim().slice(0, max) : "";
+    const phone = sanitize(body.phone, 30).replace(/[^0-9+\-()\s]/g, "");
+    const company = sanitize(body.company, 120);
+    const fullName = sanitize(body.full_name ?? body.name, 120);
+
+    // Payload aligned 1:1 with the scanner_leads schema, plus a CRM-shaped block.
     const payload = {
       id: typeof body.id === "string" ? body.id : null,
       email,
-      name: typeof body.name === "string" ? body.name : null,
+      name: typeof body.name === "string" ? body.name : (fullName || null),
       niche: typeof body.niche === "string" ? body.niche.slice(0, 200) : null,
       report_data: typeof body.report_data === "string" ? body.report_data : (body.report_data ?? null),
       scanner_answers:
@@ -45,6 +51,15 @@ Deno.serve(async (req) => {
       last_contacted_at: typeof body.last_contacted_at === "string" ? body.last_contacted_at : new Date().toISOString(),
       source: typeof body.source === "string" ? body.source : "scanner",
       created_at: typeof body.created_at === "string" ? body.created_at : new Date().toISOString(),
+      crm: {
+        full_name: fullName,
+        email,
+        phone,
+        company,
+        source: "scanner",
+        campaign: "ai-automation-scanner",
+        lead_magnet: "automation-report",
+      },
     };
 
     try {
@@ -66,7 +81,7 @@ Deno.serve(async (req) => {
         );
       }
 
-      return new Response(JSON.stringify({ success: true }), {
+      return new Response(JSON.stringify({ success: true, crm_sent: true }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

@@ -1,72 +1,59 @@
-## Problem
+## Goal
+Push scanner leads into the CRM (via the existing n8n webhook) using the CRM's required fields, and confirm success with a toast on the report page.
 
-Every report shows roughly the same `totalHoursSaved` value (often 12+). The Llama model — instructed to stay between 8 and 14 — converges on a "safe" middle number, so reports feel cookie-cutter.
+## CRM field mapping
+n8n will receive a new `crm` block alongside the existing payload. Mapping:
 
-## Root cause
+- `full_name` ← gate `name`
+- `email` ← gate `email`
+- `phone` ← new gate field (optional)
+- `company` ← new gate field (optional)
+- `source` ← `"scanner"`
+- `campaign` ← `"ai-automation-scanner"`
+- `lead_magnet` ← `"automation-report"`
 
-In `supabase/functions/generate-report/index.ts`:
-- The prompt tells the model `"totalHoursSaved": <number between 8 and 14>` with no guidance on how to vary it.
-- The server-side clamp only caps the upper bound; it never recomputes or varies the value.
-- The per-recommendation `hoursSaved` (2–5) sums to ~12 by default, reinforcing the same number.
+n8n will be responsible for forwarding the `crm` object to the CRM endpoint. No new secret needed in Lovable.
 
-## Fix
+## Changes
 
-Make `totalHoursSaved` a deterministic function of the user's actual inputs, not a free-form number from the LLM.
+**1. `src/components/ReportGate.tsx`**
+- Add two optional inputs: **Phone** (tel, optional) and **Company** (text, optional).
+- Light validation: phone max 30 chars, digits/spaces/+/-/() only; company max 120 chars; both trimmed.
+- Pass `phone` and `company` upward to the submit handler.
 
-### 1. Tier the range by inputs (prompt change)
+**2. Gate submit flow (where `scanner_leads` insert + `trigger-lead-webhook` call live)**
+- Store `phone` and `company` inside `scanner_answers` JSON (no schema change to `scanner_leads` — keeps DB stable, RLS untouched).
+- Pass them through to the edge function call.
 
-Replace the flat "8–14" instruction with explicit tiers based on signals the user provided:
+**3. `supabase/functions/trigger-lead-webhook/index.ts`**
+- Accept optional `phone` and `company` in the body (validated, length-capped, sanitized).
+- Build a `crm` object with the 7 fields above and include it in the payload posted to `N8N_WEBHOOK_URL`:
+  ```json
+  {
+    "...existing fields...": "...",
+    "crm": {
+      "full_name": "...",
+      "email": "...",
+      "phone": "...",
+      "company": "...",
+      "source": "scanner",
+      "campaign": "ai-automation-scanner",
+      "lead_magnet": "automation-report"
+    }
+  }
+  ```
+- Return `{ success: true, crm_sent: true }` only when n8n responds 200; otherwise keep the existing non-blocking `queued` behavior.
 
-```text
-Calculate totalHoursSaved tied to the user's actual workload:
-- Base by number of pain points selected:
-  • 1 pain point  → 4-7  hrs/week
-  • 2 pain points → 7-10 hrs/week
-  • 3 pain points → 10-13 hrs/week
-  • 4+ pain points→ 12-16 hrs/week
-- Adjust by business size:
-  • Solo / 1-person  → bottom of the range
-  • 2-10 employees   → middle
-  • 11+ employees    → top of the range
-- Adjust by dailyTimeDrain text:
-  • Mentions "all day", "most of my day", numbers ≥4 hrs/day → push to top
-  • Short or vague drain → bottom
-Recommendations' individual hoursSaved must SUM to roughly totalHoursSaved.
-```
-
-### 2. Server-side: recompute total from the recommendations
-
-After the model returns, override `totalHoursSaved` with the sum of `recommendations[].hoursSaved`, then clamp to a sensible window (4–16). This guarantees the number reflects the actual recommended mix and varies as the LLM varies the per-rec hours.
-
-```ts
-const recSum = recs.reduce((s, r) => s + (r.hoursSaved || 0), 0);
-report.totalHoursSaved = Math.max(4, Math.min(16, recSum || report.totalHoursSaved));
-```
-
-### 3. Deterministic jitter to break ties
-
-If two users produce identical rec sums, add ±1 hr jitter seeded by a hash of `businessType + businessSize + painPoints + dailyTimeDrain`. Same inputs → same number (stable), different inputs → different number.
-
-```ts
-const seed = hash(`${businessType}|${businessSize}|${painPoints.join(',')}|${dailyTimeDrain}`);
-const jitter = (seed % 3) - 1; // -1, 0, or +1
-report.totalHoursSaved = Math.max(4, Math.min(16, report.totalHoursSaved + jitter));
-```
-
-## Files touched
-
-- `supabase/functions/generate-report/index.ts` — prompt update + post-processing (sum + clamp + jitter).
-
-Nothing else changes — the field flows unchanged into the web report, PDF, and email.
+**4. Success toast (report page)**
+- After the gate submit resolves with `success: true`, fire a sonner toast: **"Sent to your CRM ✓"** (description: "We've added your details to follow up.").
+- On non-200 / queued response: silent (no error toast — keeps UX clean; lead is already saved).
 
 ## Out of scope
-
-- No UI changes.
-- No DB changes.
-- Per-recommendation hours stay capped at 5 (already in place).
-- Won't switch model providers.
+- No DB migration (phone/company live in `scanner_answers` jsonb).
+- No direct CRM API call from Lovable — n8n owns the CRM POST.
+- No changes to the report content, PDF, or email templates.
 
 ## Verification
-
-- Run the scanner with 3 different profiles (e.g., 1 pain point + solo, 2 pain points + 2-10, 4 pain points + 11+) and confirm three distinct `totalHoursSaved` values.
-- Run the same profile twice → same value (stable, deterministic).
+- Submit gate with phone + company → network call to `trigger-lead-webhook` includes `crm` block → toast appears.
+- Submit gate without phone/company → still works, `crm.phone` and `crm.company` are empty strings.
+- n8n webhook unreachable → no toast, no error shown, lead still saved in `scanner_leads`.
