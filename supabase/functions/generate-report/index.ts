@@ -43,7 +43,11 @@ Daily Time Drain: ${dailyTimeDrain || "Not specified"}
 
 CRITICAL RULES:
 1. Base EVERY recommendation strictly on the user's stated pain points and business context. Do NOT suggest things unrelated to what they described.
-2. Keep total hours saved CONSERVATIVE and HONEST — typically 8-14 hours/week total across all recommendations. Never exceed 16 unless the user described extreme manual workload.
+2. Calculate totalHoursSaved tied to the user's actual workload — DO NOT default to a "safe" middle number. Use these tiers:
+   - Base by number of pain points: 1 → 4-7, 2 → 7-10, 3 → 10-13, 4+ → 12-16 hrs/week
+   - Adjust by business size: solo/1-person → bottom of the range, 2-10 → middle, 11+ → top
+   - Adjust by dailyTimeDrain: mentions "all day"/"most of my day"/≥4 hrs/day → push to top; short or vague → bottom
+   - The individual recommendation hoursSaved values MUST sum to roughly totalHoursSaved
 3. Individual recommendation hoursSaved should be 2-5 hrs/week max. These are realistic for simple automations.
 4. ROI percentages should be modest: 10-30% range. Frame as "reduction in manual work" or "improvement in response time," not inflated revenue claims.
 5. Focus on automations Creative Hauz actually delivers: WhatsApp/SMS auto-replies, email sequences, appointment booking bots, invoice reminders, CRM auto-updates, lead follow-up workflows, client onboarding flows, social media scheduling, basic AI chatbots.
