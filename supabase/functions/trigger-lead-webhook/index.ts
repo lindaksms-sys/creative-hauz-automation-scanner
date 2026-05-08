@@ -1,3 +1,5 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -94,6 +96,28 @@ Deno.serve(async (req) => {
       N8N_WEBHOOK_URL ? tasks.shift()! : Promise.resolve({ ok: false, status: 0 }),
       N8N_CRM_WEBHOOK_URL ? tasks.shift()! : Promise.resolve({ ok: false, status: 0 }),
     ]);
+
+    // Persist tracking + CRM snapshot for the admin page.
+    if (payload.id) {
+      try {
+        const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+        const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+        if (SUPABASE_URL && SERVICE_ROLE) {
+          const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
+          const nowIso = new Date().toISOString();
+          await admin
+            .from("scanner_leads")
+            .update({
+              crm_payload: payload.crm,
+              ...(emailResult.ok ? { webhook_sent_at: nowIso } : {}),
+              ...(crmResult.ok ? { crm_sent_at: nowIso } : {}),
+            })
+            .eq("id", payload.id);
+        }
+      } catch (e) {
+        console.error("[trigger-lead-webhook] tracking update failed", e);
+      }
+    }
 
     return new Response(
       JSON.stringify({
