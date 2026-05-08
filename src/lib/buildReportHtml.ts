@@ -25,7 +25,6 @@ export function buildReportHtml(params: BuildReportParams): string {
   const painLabels = painPoints
     .map((p) => PAIN_POINT_LABELS[p] || p)
     .filter(Boolean);
-  const nicheResult = NICHE_RESULTS[niche] || "80% less manual work, 3x productivity";
 
   const recsHtml = recommendations
     .map(
@@ -37,24 +36,8 @@ export function buildReportHtml(params: BuildReportParams): string {
       </div>`
     )
     .join("");
-
-  const nicheAudienceLabels: Record<string, string> = {
-    "Real Estate": "real estate professionals",
-    "Healthcare / Clinic": "healthcare providers and clinics",
-    "Recruitment Agency": "recruitment agencies",
-    "Professional Services": "professional services firms",
-    "Marketing / Agency": "content creators and social media managers",
-    "Retail / E-Commerce": "retail and e-commerce businesses",
-    "Construction / Trades": "construction and trades businesses",
-    "Food & Hospitality": "food and hospitality businesses",
-  };
-  const nicheAudience = nicheAudienceLabels[niche] || "businesses like yours";
-
-  const painSection =
-    painLabels.length > 0
-      ? `<p style="font-size:15px;color:#555;line-height:1.6;">Based on your biggest time drains — <strong>${painLabels.slice(0, 3).join(", ")}</strong> — the perfect fit for <strong>${nicheAudience}</strong> is our <strong>AI Growth System</strong>.</p>
-         <p style="font-size:14px;color:#555;line-height:1.6;">This system includes the exact automations shown below, built specifically for businesses like yours.</p>`
-      : "";
+  void painLabels;
+  void niche;
 
   return `<!DOCTYPE html>
 <html lang="en">
