@@ -1,11 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ExternalLink, RotateCcw } from "lucide-react";
+import { ArrowRight, RotateCcw } from "lucide-react";
 import { BOOKING_URL } from "@/constants/scanner";
 import { motion } from "framer-motion";
 import type { ScanReport as ScanReportType, ScannerFormData } from "@/types/scanner";
 import ReportHeader from "./report/ReportHeader";
 import HeroStat from "./report/HeroStat";
-import AIGrowthSystemCTA from "./report/AIGrowthSystemCTA";
 import RecommendationList from "./report/RecommendationList";
 import EmailCapture from "./report/EmailCapture";
 import ShareReport from "./report/ShareReport";
