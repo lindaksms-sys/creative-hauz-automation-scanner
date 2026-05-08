@@ -90,24 +90,6 @@ export function buildReportHtml(params: BuildReportParams): string {
 
   <hr style="border-color:#eee;margin:28px 0;">
 
-  <div style="background:#fdf3ef;border-radius:12px;padding:24px;border:1px solid #f5d5c8;margin:0 0 8px;">
-    <h2 style="font-size:20px;font-weight:700;color:#c4572a;margin:0 0 16px;">🚀 Recommended AI System for You</h2>
-    ${painSection}
-    <p style="font-size:16px;color:#1a1a1a;line-height:1.6;margin:0 0 14px;"><strong>$9,997 one-time setup + $997/mo retainer</strong></p>
-    <p style="font-size:15px;color:#555;line-height:1.6;margin:0 0 14px;">What's included:</p>
-    <p style="font-size:14px;color:#555;line-height:1.4;margin:0 0 4px;padding-left:8px;">• AI Voice Agent + 24/7 lead capture &amp; booking</p>
-    <p style="font-size:14px;color:#555;line-height:1.4;margin:0 0 4px;padding-left:8px;">• Automated client intake &amp; onboarding</p>
-    <p style="font-size:14px;color:#555;line-height:1.4;margin:0 0 4px;padding-left:8px;">• Full workflow automation + custom dashboard</p>
-    <p style="font-size:14px;color:#555;line-height:1.4;margin:0 0 4px;padding-left:8px;">• 4-week build + 2 months of optimization calls</p>
-     <p style="font-size:15px;color:#1a1a1a;line-height:1.6;margin:14px 0 16px;">Clients in your exact niche see: <strong>${nicheResult}</strong>, ${totalHoursSaved}+ hrs saved/week.</p>
-    <div style="background:#fff;border-radius:8px;padding:16px;border-left:4px solid #c4572a;margin:16px 0 0;">
-      <p style="font-size:14px;color:#333;font-style:italic;line-height:1.5;margin:0 0 8px;">"Within 3 weeks our AI handled 80% of CV screening. We booked 3x more placements without hiring."</p>
-      <p style="font-size:13px;color:#777;margin:0;font-weight:600;">— Priya N., Recruitment Agency, Lagos</p>
-    </div>
-  </div>
-
-  <hr style="border-color:#eee;margin:28px 0;">
-
   <div style="text-align:center;">
     <p style="font-size:15px;color:#555;margin:0 0 16px;">Ready to implement these automations and start saving time?</p>
     <a href="https://calendar.app.google/3RL1z4zboDkeWLebA" style="background:#c4572a;color:#fff;padding:14px 28px;border-radius:8px;font-size:15px;font-weight:600;text-decoration:none;display:inline-block;">Book My Free AI Audit →</a>
