@@ -1,72 +1,57 @@
+## Goal
 
+Remove the generic "AI Growth System" recommendation block (the $9,997 one-time + $997/mo offer) everywhere it currently appears in the scanner output. Keep the personalized automation recommendations, the hours-saved hero stat, the booking CTA, and the email-summary delivery flow intact.
 
-## Create `update-scanner-lead-state` Edge Function
+## Audit — where the offer currently lives
 
-A new server-side endpoint that lets n8n (or any external workflow) safely update `scanner_leads` rows — booking status, follow-up stage, timestamps — without ever holding the Supabase service role key.
+1. **Web report (`src/components/ScanReport.tsx`)** — renders `<AIGrowthSystemCTA variant="full">` near the top and `<AIGrowthSystemCTA variant="compact">` near the bottom.
+2. **Component (`src/components/report/AIGrowthSystemCTA.tsx`)** — full file is the offer (badge "Recommended AI System for You", $9,997 line, "What's included" list, niche-results box, two testimonials, audit CTA).
+3. **PDF (`src/lib/generateReportPdf.ts`)**
+   - Lines ~153–222: top "Recommended AI System for You" card with $9,997 pricing, includes list, niche-results box, testimonial.
+   - Lines ~298–319: bottom "Your Recommended System: AI Growth System" orange CTA banner.
+4. **Email HTML (`src/lib/buildReportHtml.ts`)** lines ~91–107: "🚀 Recommended AI System for You" block with $9,997 line, includes list, niche-results, testimonial.
+5. **Transactional email template (`supabase/functions/_shared/transactional-email-templates/report-summary.tsx`)** lines ~85–~110 (similar block).
+6. **Memory** — `mem://business/ai-growth-system-offer` exists for this offer; should be marked retired so future sessions don't re-introduce it.
 
-### What gets built
+## What changes
 
-**1. New edge function: `supabase/functions/update-scanner-lead-state/index.ts`**
+### Web report
+- Delete both `<AIGrowthSystemCTA>` usages from `ScanReport.tsx` (and the import).
+- Delete `src/components/report/AIGrowthSystemCTA.tsx` entirely.
+- Keep the existing "Ready to implement these automations?" CTA card (Book My Free AI Audit + Full Blueprint links) — it stays as the single conversion CTA.
 
-- Accepts only `POST` (everything else → 405). Handles `OPTIONS` preflight.
-- Auth: requires header `x-workflow-secret` matching `Deno.env.get("WORKFLOW_SHARED_SECRET")`. Missing/wrong → 401.
-- Parses JSON body. Identifier resolution: prefer `id`, fall back to `email`. Neither → 400.
-- Builds an update object containing **only** fields present in the body, restricted to this allowlist:
-  - `booked` (boolean)
-  - `follow_up_stage` (text)
-  - `booking_date` (timestamptz)
-  - `last_contacted_at` (timestamptz)
-  - `case_study_sent_at` (timestamptz, nullable)
-  - `reminder_sent_at` (timestamptz, nullable)
-- `undefined` values skipped; explicit `null` allowed (so n8n can clear timestamps).
-- Uses `createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)` with `auth: { persistSession: false }`.
-- Runs `.update(updates).eq('id'|'email', value).select().maybeSingle()`.
-- No row → 404 `{ success: false, error: "lead_not_found" }`.
-- Success → 200 `{ success: true, lead: updatedRow }`.
-- Logs: `[update-scanner-lead-state] invalid_secret`, `missing_identifier`, `no_match id=…`, `updated id=… stage=…`, plus error details on db failures.
-- CORS headers on every response (including errors) — `Access-Control-Allow-Headers` includes `x-workflow-secret`, `content-type`, `authorization`, `apikey`.
+### PDF (`generateReportPdf.ts`)
+- Remove the top AI Growth System card (the section labeled `── AI GROWTH SYSTEM SECTION (TOP — Full) ──`, ~lines 153–222, including its `ensureSpace`, header bar, body, includes list, niche box, testimonial, and the trailing `y += 74`).
+- Remove the bottom AI Growth System CTA banner (~lines 298–319).
+- Add a small replacement footer CTA (single line + booking URL) so the PDF still ends with a clear next step:
+  > "Want help implementing these? Book a free 30-min AI Audit — calendar.app.google/3RL1z4zboDkeWLebA"
+- Drop now-unused locals (`drainText`, `nicheResults`, related niche maps) only if nothing else references them after the cuts.
 
-**2. `supabase/config.toml`** — add a function block to disable JWT verification (auth is the shared secret instead):
+### Email summary
+- In `buildReportHtml.ts`: remove the "🚀 Recommended AI System for You" block (the entire `<div style="background:#fdf3ef …">` containing pain section, $9,997 line, includes list, niche-result line, and Priya testimonial). Keep the recommendations list, the hours-saved hero, and the existing "Book My Free AI Audit →" CTA further down.
+- In `report-summary.tsx` template: delete the equivalent block (lines ~85–110) so the queued/transactional email matches.
 
-```toml
-[functions.update-scanner-lead-state]
-verify_jwt = false
-```
+### Memory hygiene
+- Update `mem://business/ai-growth-system-offer` to mark the offer as retired ("Do not re-introduce the $9,997 AI Growth System recommendation in scanner output.") and update the index entry so future sessions know not to re-add it.
 
-**3. RLS** — no changes needed. Service role bypasses RLS, so the existing `scanner_leads` policies are fine.
+## Out of scope
 
-**4. New secret to add:** `WORKFLOW_SHARED_SECRET` — I'll prompt you to paste a strong random value (e.g. a 32-char token you generate). The function will refuse all requests until it's set.
+- No copy changes to the personalized recommendations themselves.
+- No changes to questionnaire, lead capture, n8n webhook, Supabase tables, RLS, or auth.
+- No new offer or replacement product copy — user only asked to remove the generic recommendation. If you later want a different offer block, that's a follow-up.
 
-### Deployed URL
+## Files touched
 
-`https://nlfclipvqxipaoxxoxzu.supabase.co/functions/v1/update-scanner-lead-state`
+- `src/components/ScanReport.tsx` (edit)
+- `src/components/report/AIGrowthSystemCTA.tsx` (delete)
+- `src/lib/generateReportPdf.ts` (edit)
+- `src/lib/buildReportHtml.ts` (edit)
+- `supabase/functions/_shared/transactional-email-templates/report-summary.tsx` (edit)
+- `mem://business/ai-growth-system-offer` + `mem://index.md` (update)
 
-### Sample n8n HTTP Request node config
+## Verification
 
-- **Method**: POST
-- **URL**: `https://nlfclipvqxipaoxxoxzu.supabase.co/functions/v1/update-scanner-lead-state`
-- **Authentication**: None (we use a custom header)
-- **Headers**:
-  - `x-workflow-secret`: `{{ $env.WORKFLOW_SHARED_SECRET }}` (store it in n8n's credentials/env, not inline)
-  - `Content-Type`: `application/json`
-- **Body** (JSON):
-  ```json
-  {
-    "email": "{{ $json.email }}",
-    "booked": true,
-    "follow_up_stage": "booked",
-    "booking_date": "{{ $json.booking_date }}",
-    "last_contacted_at": "{{ $now.toISO() }}"
-  }
-  ```
-
-### Order of operations
-
-1. You approve this plan.
-2. I add the `WORKFLOW_SHARED_SECRET` secret prompt — **you paste a value** before the function will work.
-3. I create the function file + config.toml entry. It auto-deploys.
-4. I share the final code, the URL above, and confirm the secret name.
-5. You wire up n8n.
-
-No frontend changes. No DB schema changes. No changes to existing functions.
-
+- Run the scanner end-to-end in preview, confirm no "AI Growth System" / "$9,997" copy in the rendered report.
+- Download PDF, confirm the two removed sections are gone and layout still flows.
+- Trigger an email summary (or use the `preview-transactional-email` function) and confirm the offer block is gone.
+- `rg -n "AI Growth System|9,?997"` returns zero hits in `src/` and `supabase/functions/`.

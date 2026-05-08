@@ -1,11 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ExternalLink, RotateCcw } from "lucide-react";
+import { ArrowRight, RotateCcw } from "lucide-react";
 import { BOOKING_URL } from "@/constants/scanner";
 import { motion } from "framer-motion";
 import type { ScanReport as ScanReportType, ScannerFormData } from "@/types/scanner";
 import ReportHeader from "./report/ReportHeader";
 import HeroStat from "./report/HeroStat";
-import AIGrowthSystemCTA from "./report/AIGrowthSystemCTA";
 import RecommendationList from "./report/RecommendationList";
 import EmailCapture from "./report/EmailCapture";
 import ShareReport from "./report/ShareReport";
@@ -21,9 +20,6 @@ const ScanReportView = ({ report, scannerData, onRestart }: Props) => (
     <div className="max-w-3xl mx-auto">
       <ReportHeader summary={report.summary} industryInsight={report.industryInsight} />
       <HeroStat totalHoursSaved={report.totalHoursSaved} />
-
-      {/* Top: Full AI Growth System CTA */}
-      <AIGrowthSystemCTA scannerData={scannerData} totalHoursSaved={report.totalHoursSaved} variant="full" delay={0.3} />
 
       <RecommendationList recommendations={report.recommendations} />
 
@@ -71,11 +67,6 @@ const ScanReportView = ({ report, scannerData, onRestart }: Props) => (
       </motion.div>
 
       <EmailCapture report={report} scannerData={scannerData} />
-
-      {/* Bottom: Compact AI Growth System CTA */}
-      <div className="mt-8">
-        <AIGrowthSystemCTA scannerData={scannerData} totalHoursSaved={report.totalHoursSaved} variant="compact" delay={1} />
-      </div>
 
       <div className="flex flex-col items-center gap-4 mt-8">
         <ShareReport report={report} />

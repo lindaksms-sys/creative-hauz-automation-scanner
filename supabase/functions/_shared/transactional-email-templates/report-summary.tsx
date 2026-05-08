@@ -82,41 +82,6 @@ const ReportSummaryEmail = ({ name, totalHoursSaved, niche, painPoints, recommen
 
           <Hr style={divider} />
 
-          {/* AI Growth System Recommendation */}
-          <Section style={proposalBox}>
-            <Heading style={h2Proposal}>🚀 Recommended AI System for You</Heading>
-
-            {painLabels.length > 0 && (
-              <Text style={text}>
-                Based on your biggest time drains — <strong>{painLabels.slice(0, 3).join(', ')}</strong> — the perfect fit is our <strong>AI Growth System</strong>.
-              </Text>
-            )}
-
-            <Text style={pricingText}>
-              <strong>$9,997 one-time setup + $997/mo retainer</strong>
-            </Text>
-
-            <Text style={text}>What's included:</Text>
-            <Text style={bulletText}>• AI Voice Agent + 24/7 lead capture & booking</Text>
-            <Text style={bulletText}>• Automated client intake & onboarding</Text>
-            <Text style={bulletText}>• Full workflow automation + custom dashboard</Text>
-            <Text style={bulletText}>• 4-week build + 2 months of optimization calls</Text>
-
-            <Text style={nicheResultText}>
-              Clients in your exact niche see: <strong>{nicheResult}</strong>, {totalHoursSaved ?? 15}+ hrs saved/week.
-            </Text>
-
-            {/* Testimonial */}
-            <Section style={testimonialCard}>
-              <Text style={testimonialQuote}>
-                "Within 3 weeks our AI handled 80% of CV screening. We booked 3x more placements without hiring."
-              </Text>
-              <Text style={testimonialAuthor}>— Priya N., Recruitment Agency, Lagos</Text>
-            </Section>
-          </Section>
-
-          <Hr style={divider} />
-
           {/* CTA */}
           <Section style={ctaSection}>
             <Text style={ctaText}>
