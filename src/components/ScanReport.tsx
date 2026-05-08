@@ -21,9 +21,6 @@ const ScanReportView = ({ report, scannerData, onRestart }: Props) => (
       <ReportHeader summary={report.summary} industryInsight={report.industryInsight} />
       <HeroStat totalHoursSaved={report.totalHoursSaved} />
 
-      {/* Top: Full AI Growth System CTA */}
-      <AIGrowthSystemCTA scannerData={scannerData} totalHoursSaved={report.totalHoursSaved} variant="full" delay={0.3} />
-
       <RecommendationList recommendations={report.recommendations} />
 
       {/* Disclaimer */}
