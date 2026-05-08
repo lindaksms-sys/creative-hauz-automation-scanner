@@ -36,11 +36,11 @@ Deno.serve(async (req) => {
       return json({ error: "Forbidden" }, 403);
     }
 
-    const url = new URL(req.url);
-    const range = url.searchParams.get("range") ?? "7d"; // today | 7d | 30d | all
-    const webhookFilter = url.searchParams.get("webhook") ?? "any"; // any | sent | failed
-    const crmFilter = url.searchParams.get("crm") ?? "any"; // any | sent | failed
-    const search = url.searchParams.get("q")?.trim() ?? "";
+    const body = await req.json().catch(() => ({}));
+    const range = (body.range as string) ?? "7d"; // today | 7d | 30d | all
+    const webhookFilter = (body.webhook as string) ?? "any"; // any | sent | failed
+    const crmFilter = (body.crm as string) ?? "any"; // any | sent | failed
+    const search = typeof body.q === "string" ? body.q.trim() : "";
 
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
     let q = admin

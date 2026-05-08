@@ -59,11 +59,9 @@ export default function Admin() {
     if (!session) return;
     setLoading(true);
     try {
-      const params = new URLSearchParams({ range, webhook, crm, q: search });
-      const { data, error } = await supabase.functions.invoke(
-        `admin-list-leads?${params.toString()}`,
-        { method: "GET" },
-      );
+      const { data, error } = await supabase.functions.invoke("admin-list-leads", {
+        body: { range, webhook, crm, q: search },
+      });
       if (error) throw error;
       setLeads((data as { leads: Lead[] })?.leads ?? []);
     } catch (e) {
