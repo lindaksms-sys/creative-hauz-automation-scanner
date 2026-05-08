@@ -20,11 +20,7 @@ interface BuildReportParams {
 }
 
 export function buildReportHtml(params: BuildReportParams): string {
-  const { totalHoursSaved, recommendations, summary, industryInsight, niche, painPoints } = params;
-
-  const painLabels = painPoints
-    .map((p) => PAIN_POINT_LABELS[p] || p)
-    .filter(Boolean);
+  const { totalHoursSaved, recommendations, summary, industryInsight } = params;
 
   const recsHtml = recommendations
     .map(
@@ -36,8 +32,6 @@ export function buildReportHtml(params: BuildReportParams): string {
       </div>`
     )
     .join("");
-  void painLabels;
-  void niche;
 
   return `<!DOCTYPE html>
 <html lang="en">
