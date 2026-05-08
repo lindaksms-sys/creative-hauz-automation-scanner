@@ -210,6 +210,20 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1.5">
+                Full name
+              </label>
+              <input
+                type="text"
+                placeholder="Your name"
+                value={name}
+                maxLength={120}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full h-12 px-4 rounded-lg border border-input bg-background text-foreground focus:ring-2 focus:ring-ring outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1.5">
                 Email address <span className="text-destructive">*</span>
               </label>
               <input
@@ -220,6 +234,35 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full h-12 px-4 rounded-lg border border-input bg-background text-foreground focus:ring-2 focus:ring-ring outline-none"
               />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">
+                  Phone
+                </label>
+                <input
+                  type="tel"
+                  placeholder="+1 555 123 4567"
+                  value={phone}
+                  maxLength={30}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full h-12 px-4 rounded-lg border border-input bg-background text-foreground focus:ring-2 focus:ring-ring outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">
+                  Company
+                </label>
+                <input
+                  type="text"
+                  placeholder="Company name"
+                  value={company}
+                  maxLength={120}
+                  onChange={(e) => setCompany(e.target.value)}
+                  className="w-full h-12 px-4 rounded-lg border border-input bg-background text-foreground focus:ring-2 focus:ring-ring outline-none"
+                />
+              </div>
             </div>
 
             <div>
