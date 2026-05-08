@@ -14,8 +14,13 @@ interface Props {
   onContinueToReport: () => void;
 }
 
+const PHONE_RE = /^[0-9+\-()\s]*$/;
+
 const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [company, setCompany] = useState("");
   const [niche, setNiche] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -23,6 +28,13 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !niche) return;
+    const cleanPhone = phone.trim().slice(0, 30);
+    const cleanCompany = company.trim().slice(0, 120);
+    const cleanName = name.trim().slice(0, 120);
+    if (cleanPhone && !PHONE_RE.test(cleanPhone)) {
+      toast.error("Please enter a valid phone number.");
+      return;
+    }
     setSubmitting(true);
     try {
       const leadId = crypto.randomUUID();
