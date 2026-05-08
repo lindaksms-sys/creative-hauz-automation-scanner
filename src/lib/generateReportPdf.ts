@@ -150,76 +150,7 @@ export const generateReportPdf = (report: ScanReport, scannerData?: ScannerFormD
   doc.text("est. yearly savings", margin + contentWidth * 3 / 4 + 1, y + 14, { align: "center" });
   y += 26;
 
-  // ── AI GROWTH SYSTEM SECTION (TOP — Full) ──
-  ensureSpace(85);
-
-  doc.setFillColor(...colors.primary);
-  doc.roundedRect(margin, y, contentWidth, 10, 3, 3, "F");
-  // Fill bottom corners to make only top rounded
-  doc.rect(margin, y + 5, contentWidth, 5, "F");
-  doc.setTextColor(...colors.white);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
-  doc.text("★  Recommended AI System for You", margin + 6, y + 7);
-  y += 12;
-
-  doc.setFillColor(...colors.cardBg);
-  doc.setDrawColor(...colors.primary);
-  doc.setLineWidth(0.5);
-  doc.roundedRect(margin, y, contentWidth, 70, 0, 0, "FD");
-  doc.setLineWidth(0.2);
-
-  const sysY = y + 6;
-  doc.setTextColor(...colors.dark);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  const bodyText = `Based on your biggest time drains — ${drainText} — the perfect fit is our AI Growth System ($9,997 one-time + $997/mo retainer).`;
-  const bodyLines = doc.splitTextToSize(bodyText, contentWidth - 16);
-  doc.text(bodyLines, margin + 8, sysY);
-  let innerY = sysY + bodyLines.length * 4.5 + 4;
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.text("WHAT'S INCLUDED:", margin + 8, innerY);
-  innerY += 5;
-
-  const includes = [
-    "AI Voice Agent + 24/7 lead capture & booking",
-    "Automated client intake & onboarding",
-    "Full workflow automation + custom dashboard",
-    "4-week build + 2 months of optimization calls",
-  ];
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  includes.forEach((item) => {
-    doc.setTextColor(...colors.green);
-    doc.text("✓", margin + 10, innerY);
-    doc.setTextColor(...colors.dark);
-    doc.text(item, margin + 16, innerY);
-    innerY += 4.5;
-  });
-
-  innerY += 2;
-  doc.setFillColor(...colors.greenLight);
-  doc.roundedRect(margin + 6, innerY, contentWidth - 12, 8, 2, 2, "F");
-  doc.setTextColor(...colors.green);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(7.5);
-  doc.text(`Clients in your niche see: ${nicheResults}`, margin + 10, innerY + 5.5);
-
-  innerY += 12;
-  doc.setTextColor(...colors.primary);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.text("Testimonial:", margin + 8, innerY);
-  doc.setFont("helvetica", "italic");
-  doc.setFontSize(7.5);
-  doc.setTextColor(...colors.muted);
-  const testimonial = '"We went from spending full Mondays screening CVs to having our AI pre-qualify candidates overnight. Placements tripled in 2 months." — Priya N., Recruitment Agency, Lagos';
-  const testLines = doc.splitTextToSize(testimonial, contentWidth - 16);
-  doc.text(testLines, margin + 8, innerY + 4);
-
-  y += 74;
+  y += 4;
 
   // ── Recommendations ──
   ensureSpace(15);
