@@ -1,59 +1,51 @@
 ## Goal
-Push scanner leads into the CRM (via the existing n8n webhook) using the CRM's required fields, and confirm success with a toast on the report page.
+Refresh the scanner's visual identity to match the new Creative Hauz 2025 brand kit (Charcoal-first hybrid palette + Cormorant Garamond / DM Sans typography), while keeping every text/button combination at AA contrast.
 
-## CRM field mapping
-n8n will receive a new `crm` block alongside the existing payload. Mapping:
+## New brand tokens (HSL)
 
-- `full_name` ← gate `name`
-- `email` ← gate `email`
-- `phone` ← new gate field (optional)
-- `company` ← new gate field (optional)
-- `source` ← `"scanner"`
-- `campaign` ← `"ai-automation-scanner"`
-- `lead_magnet` ← `"automation-report"`
+| Role | Name | Hex | HSL |
+|---|---|---|---|
+| Primary surface (light) | Bone | `#EDE7D8` | `43 35% 89%` |
+| Card surface (light) | Bone Soft | `#F2ECDD` | `43 41% 91%` |
+| Body text / dark surface | Charcoal | `#14130F` | `45 11% 7%` |
+| Deepest contrast / footer | Deep Black | `#0E0D0A` | `40 14% 5%` |
+| Card surface (dark) | Ink Soft | `#1F1D18` | `40 14% 11%` |
+| Accent / CTAs / links | Antique Brass | `#D4A24C` | `38 60% 56%` |
+| Secondary highlight (tags only) | Rust | `#C8451A` | `14 78% 45%` |
+| Muted copy on light | Muted Mid | `#5A5247` | `30 13% 32%` |
 
-n8n will be responsible for forwarding the `crm` object to the CRM endpoint. No new secret needed in Lovable.
+**Contrast rule:** Antique Brass on Bone fails AA for body text — Brass is reserved for CTA backgrounds (with **Charcoal** foreground, ~7:1) and for non-text accents (icons, underlines, dividers). Body links use Charcoal underline + Brass on hover. Rust is used **only** on small tag/badge chips with white text.
 
-## Changes
+## Typography
+Replace `DM Serif Display` + `Inter` with the new pairing:
+- **Headings:** Cormorant Garamond (400/600/700)
+- **Body:** DM Sans (300/400/500)
 
-**1. `src/components/ReportGate.tsx`**
-- Add two optional inputs: **Phone** (tel, optional) and **Company** (text, optional).
-- Light validation: phone max 30 chars, digits/spaces/+/-/() only; company max 120 chars; both trimmed.
-- Pass `phone` and `company` upward to the submit handler.
+Update the Google Fonts `@import` in `src/index.css` and the `fontFamily` map in `tailwind.config.ts` (`display` → Cormorant, `sans` → DM Sans). Bump heading weight to 600 since Cormorant is lighter than DM Serif Display.
 
-**2. Gate submit flow (where `scanner_leads` insert + `trigger-lead-webhook` call live)**
-- Store `phone` and `company` inside `scanner_answers` JSON (no schema change to `scanner_leads` — keeps DB stable, RLS untouched).
-- Pass them through to the edge function call.
+## Files to update
 
-**3. `supabase/functions/trigger-lead-webhook/index.ts`**
-- Accept optional `phone` and `company` in the body (validated, length-capped, sanitized).
-- Build a `crm` object with the 7 fields above and include it in the payload posted to `N8N_WEBHOOK_URL`:
-  ```json
-  {
-    "...existing fields...": "...",
-    "crm": {
-      "full_name": "...",
-      "email": "...",
-      "phone": "...",
-      "company": "...",
-      "source": "scanner",
-      "campaign": "ai-automation-scanner",
-      "lead_magnet": "automation-report"
-    }
-  }
-  ```
-- Return `{ success: true, crm_sent: true }` only when n8n responds 200; otherwise keep the existing non-blocking `queued` behavior.
+1. **`src/index.css`** — swap font import; rewrite the `:root` and `.dark` token blocks with the values above; update `--gradient-primary` to a Brass→Rust ramp, `--gradient-hero` to Bone→Bone Soft, `--shadow-glow` to Brass-tinted; update the `.font-display` rule to Cormorant 600.
 
-**4. Success toast (report page)**
-- After the gate submit resolves with `success: true`, fire a sonner toast: **"Sent to your CRM ✓"** (description: "We've added your details to follow up.").
-- On non-200 / queued response: silent (no error toast — keeps UX clean; lead is already saved).
+2. **`tailwind.config.ts`** — update `fontFamily.display` to Cormorant and `fontFamily.sans` to DM Sans; keep the existing semantic color mappings (they read from CSS vars, so no rename needed). Drop unused `green-accent` / `navy` aliases or repoint them to neutral charcoal so old class usages still render on-brand.
+
+3. **`src/lib/buildReportHtml.ts`** (email/PDF HTML) — replace the hardcoded hex values with the new palette: card stripe `#4a9e7a` → Brass `#D4A24C`; brand wordmark accent `#c4572a` → Brass; hero stat block bg `#fdf3ef` → Bone Soft `#F2ECDD` with Brass border; CTA button `#c4572a` → Charcoal `#14130F` bg with Bone text (CTAs in email need very high contrast); urgency line `#e67e22` → Rust `#C8451A`; footer link `#c4572a` → Charcoal underline.
+
+4. **Visual sweep** of components that may hardcode old terracotta classes or `text-white` on light surfaces:
+   - `Navbar.tsx`, `HeroSection.tsx`, `Footer.tsx`
+   - `ScannerQuestionnaire.tsx`, `ReportGate.tsx`, `ScanReport.tsx`
+   - `report/ReportHeader.tsx`, `HeroStat.tsx`, `RecommendationList.tsx`, `ShareReport.tsx`, `EmailCapture.tsx`
+   - `CookieConsent.tsx`
+   Replace any `text-white`, `bg-black`, raw hexes, or `text-terracotta` literals with semantic tokens (`text-primary-foreground`, `bg-primary`, `text-accent`, etc.). No business-logic changes.
+
+5. **`index.html`** — update the `<meta name="theme-color">` to Bone `#EDE7D8` so mobile browser chrome matches.
 
 ## Out of scope
-- No DB migration (phone/company live in `scanner_answers` jsonb).
-- No direct CRM API call from Lovable — n8n owns the CRM POST.
-- No changes to the report content, PDF, or email templates.
+- No copy changes, no layout changes, no component restructure.
+- No changes to scanner logic, AI prompts, lead flow, n8n payload, or PDF layout structure (only the colors/fonts inside it).
+- Memory file `mem://style/visual-identity` will be refreshed in the same pass to record the new palette/fonts and retire the old terracotta `#BF5728` reference.
 
 ## Verification
-- Submit gate with phone + company → network call to `trigger-lead-webhook` includes `crm` block → toast appears.
-- Submit gate without phone/company → still works, `crm.phone` and `crm.company` are empty strings.
-- n8n webhook unreachable → no toast, no error shown, lead still saved in `scanner_leads`.
+- Visually confirm light theme on `/index`, scanner steps, gate form, and report page at the current 384px viewport.
+- Spot-check the generated PDF and the email HTML preview for contrast.
+- Confirm no `text-white`/raw-hex regressions via a quick `rg` after edits.
