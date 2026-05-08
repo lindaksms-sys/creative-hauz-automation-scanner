@@ -51,13 +51,19 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
 
       // Save lead to database with full follow-up workflow schema
       const nowIso = new Date().toISOString();
+      const enrichedAnswers = {
+        ...(scannerData as any),
+        phone: cleanPhone || null,
+        company: cleanCompany || null,
+        full_name: cleanName || null,
+      };
       const leadRow = {
         id: leadId,
         email: email.trim(),
-        name: null as string | null,
+        name: cleanName || null,
         niche,
         report_data: reportHtml as any,
-        scanner_answers: scannerData as any,
+        scanner_answers: enrichedAnswers as any,
         booked: false,
         follow_up_stage: "report_sent",
         last_contacted_at: nowIso,
@@ -67,14 +73,22 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
       const { error } = await supabase.from("scanner_leads").insert(leadRow);
       if (error) throw error;
 
-      // Fire webhook with the EXACT same payload shape as scanner_leads.
+      // Fire webhook with the EXACT same payload shape as scanner_leads + a CRM block.
       // Non-blocking: failures are logged server-side for retry but won't disrupt UX.
+      let crmSent = false;
       try {
-        const { error: webhookError } = await supabase.functions.invoke("trigger-lead-webhook", {
-          body: leadRow,
+        const { data: webhookData, error: webhookError } = await supabase.functions.invoke("trigger-lead-webhook", {
+          body: {
+            ...leadRow,
+            phone: cleanPhone,
+            company: cleanCompany,
+            full_name: cleanName,
+          },
         });
         if (webhookError) {
           console.warn("[lead-webhook] non-blocking failure:", webhookError);
+        } else if (webhookData?.crm_sent) {
+          crmSent = true;
         }
       } catch (webhookErr) {
         console.warn("[lead-webhook] non-blocking exception:", webhookErr);
@@ -82,6 +96,11 @@ const ReportGate = ({ report, scannerData, onContinueToReport }: Props) => {
 
       setSubmitted(true);
       toast.success("Report sent to your inbox!");
+      if (crmSent) {
+        toast.success("Sent to your CRM ✓", {
+          description: "We've added your details to follow up.",
+        });
+      }
     } catch {
       toast.error("Something went wrong. Please try again.");
     } finally {
