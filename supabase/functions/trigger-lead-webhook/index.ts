@@ -13,8 +13,9 @@ Deno.serve(async (req) => {
 
   try {
     const N8N_WEBHOOK_URL = Deno.env.get("N8N_WEBHOOK_URL");
-    if (!N8N_WEBHOOK_URL) {
-      console.error("N8N_WEBHOOK_URL is not configured");
+    const N8N_CRM_WEBHOOK_URL = Deno.env.get("N8N_CRM_WEBHOOK_URL");
+    if (!N8N_WEBHOOK_URL && !N8N_CRM_WEBHOOK_URL) {
+      console.error("No n8n webhook URLs are configured");
       // Non-blocking: report success to client so user flow isn't interrupted.
       return new Response(
         JSON.stringify({ success: false, queued: true, reason: "webhook_not_configured" }),
@@ -62,38 +63,47 @@ Deno.serve(async (req) => {
       },
     };
 
-    try {
-      const response = await fetch(N8N_WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const text = await response.text().catch(() => "");
-        // Log for later retry — lead is already saved in DB, do not throw to client.
+    const postTo = async (url: string, body: unknown, label: string) => {
+      try {
+        const r = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (!r.ok) {
+          const text = await r.text().catch(() => "");
+          console.error(
+            `[${label}-retry] status=${r.status} email=${payload.email} id=${payload.id} body=${text.slice(0, 500)}`,
+          );
+          return { ok: false, status: r.status };
+        }
+        return { ok: true, status: r.status };
+      } catch (err) {
         console.error(
-          `[lead-webhook-retry] status=${response.status} email=${payload.email} id=${payload.id} body=${text.slice(0, 500)}`,
+          `[${label}-retry] network_error email=${payload.email} id=${payload.id} err=${String(err)}`,
         );
-        return new Response(
-          JSON.stringify({ success: false, queued: true, status: response.status }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
+        return { ok: false, status: 0 };
       }
+    };
 
-      return new Response(JSON.stringify({ success: true, crm_sent: true }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    } catch (fetchErr) {
-      console.error(
-        `[lead-webhook-retry] network_error email=${payload.email} id=${payload.id} err=${String(fetchErr)}`,
-      );
-      return new Response(
-        JSON.stringify({ success: false, queued: true, reason: "network_error" }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
-    }
+    const tasks: Promise<{ ok: boolean; status: number }>[] = [];
+    if (N8N_WEBHOOK_URL) tasks.push(postTo(N8N_WEBHOOK_URL, payload, "lead-webhook"));
+    if (N8N_CRM_WEBHOOK_URL) tasks.push(postTo(N8N_CRM_WEBHOOK_URL, payload.crm, "crm-webhook"));
+
+    const [emailResult, crmResult] = await Promise.all([
+      N8N_WEBHOOK_URL ? tasks.shift()! : Promise.resolve({ ok: false, status: 0 }),
+      N8N_CRM_WEBHOOK_URL ? tasks.shift()! : Promise.resolve({ ok: false, status: 0 }),
+    ]);
+
+    return new Response(
+      JSON.stringify({
+        success: emailResult.ok || crmResult.ok,
+        email_sent: emailResult.ok,
+        crm_sent: crmResult.ok,
+        queued: !emailResult.ok || (Boolean(N8N_CRM_WEBHOOK_URL) && !crmResult.ok),
+      }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   } catch (error: unknown) {
     console.error("Error triggering lead webhook:", error);
     // Still non-blocking on unexpected errors.
