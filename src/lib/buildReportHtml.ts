@@ -9,14 +9,6 @@ const PAIN_POINT_LABELS: Record<string, string> = {
   "social-media": "Social media management overhead",
 };
 
-const NICHE_RESULTS: Record<string, string> = {
-  "Real Estate": "80% faster lead response, 3x appointments booked",
-  "Recruitment Agency": "80% faster CV screening, 3x placements booked",
-  "Law Firm": "60% less admin overhead, 2x client consultations",
-  "Accounting Firm": "70% faster document processing, 2x client capacity",
-  "Clinic / Med Spa": "85% fewer no-shows, 3x bookings per week",
-  "Coach / Consultant": "90% automated scheduling, 2x discovery calls",
-};
 
 interface BuildReportParams {
   totalHoursSaved: number;
