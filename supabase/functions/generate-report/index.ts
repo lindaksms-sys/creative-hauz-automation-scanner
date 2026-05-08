@@ -119,15 +119,27 @@ Provide exactly 4 recommendations. Order by relevance to their stated pain point
       throw new Error("Failed to parse AI response");
     }
 
-    // Clamp values to enforce conservative limits
-    if (report.totalHoursSaved > 16) report.totalHoursSaved = Math.min(report.totalHoursSaved, 14);
+    // Clamp per-recommendation values
     if (report.recommendations) {
       report.recommendations = report.recommendations.map((rec: any) => ({
         ...rec,
-        hoursSaved: Math.min(rec.hoursSaved || 3, 5),
+        hoursSaved: Math.max(1, Math.min(rec.hoursSaved || 3, 5)),
         roiPercent: Math.min(rec.roiPercent || 15, 35),
       }));
     }
+
+    // Recompute totalHoursSaved from the actual recommendations so it varies per submission
+    const recs = Array.isArray(report.recommendations) ? report.recommendations : [];
+    const recSum = recs.reduce((s: number, r: any) => s + (Number(r.hoursSaved) || 0), 0);
+    let total = recSum > 0 ? recSum : Number(report.totalHoursSaved) || 8;
+
+    // Deterministic ±1 jitter seeded by the user's inputs (same inputs → same number)
+    const seedStr = `${businessType}|${businessSize}|${industry}|${painPoints.join(",")}|${customPainPoint}|${dailyTimeDrain}`;
+    let seed = 0;
+    for (let i = 0; i < seedStr.length; i++) seed = ((seed << 5) - seed + seedStr.charCodeAt(i)) | 0;
+    const jitter = (Math.abs(seed) % 3) - 1; // -1, 0, +1
+    total = Math.max(4, Math.min(16, total + jitter));
+    report.totalHoursSaved = total;
 
     return new Response(JSON.stringify(report), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
