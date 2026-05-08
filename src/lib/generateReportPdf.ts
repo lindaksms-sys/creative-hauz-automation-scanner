@@ -226,28 +226,20 @@ export const generateReportPdf = (report: ScanReport, scannerData?: ScannerFormD
   doc.text("These estimates are based on typical results from similar businesses. Actual savings depend on your current processes and implementation.", pageWidth / 2, y, { align: "center", maxWidth: contentWidth });
   y += 12;
 
-  // ── Bottom AI Growth System CTA ──
-  ensureSpace(45);
+  // ── Booking CTA ──
+  ensureSpace(28);
 
   doc.setFillColor(...colors.primary);
-  doc.roundedRect(margin, y, contentWidth, 40, 4, 4, "F");
+  doc.roundedRect(margin, y, contentWidth, 24, 4, 4, "F");
 
   doc.setTextColor(...colors.white);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(13);
-  doc.text("Your Recommended System: AI Growth System", pageWidth / 2, y + 11, { align: "center" });
+  doc.setFontSize(11);
+  doc.text("Want help implementing these? Book a free 30-min AI Audit.", pageWidth / 2, y + 10, { align: "center" });
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.text("Book your free 30-min AI Audit and get this live in under 30 days.", pageWidth / 2, y + 19, { align: "center" });
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.text("Book My Free AI Audit →", pageWidth / 2, y + 30, { align: "center" });
-
-  doc.setFontSize(7);
-  doc.setFont("helvetica", "normal");
-  doc.text("calendar.app.google/3RL1z4zboDkeWLebA", pageWidth / 2, y + 36, { align: "center" });
+  doc.setFontSize(8);
+  doc.text("calendar.app.google/3RL1z4zboDkeWLebA", pageWidth / 2, y + 18, { align: "center" });
 
   // ── Footer ──
   const footerY = pageHeight - 12;
